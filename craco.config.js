@@ -23,8 +23,7 @@ module.exports = {
     proxy: {
       '/api': {
         target: process.env.REACT_APP_BASE_URL,
-        changeOrigin: true,
-        pathRewrite: { '^/api': '' }
+        changeOrigin: true
       }
     }
   }

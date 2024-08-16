@@ -7,9 +7,9 @@ interface IProps {
 
 const Home: FC<IProps> = () => {
   return (
-    <div>
+    <section>
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
-    </div>
+    </section>
   );
 };
 
