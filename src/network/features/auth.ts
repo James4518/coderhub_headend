@@ -1,15 +1,23 @@
 import myRequest from '..';
 
-export function signup(data) {
-  return myRequest.post({
-    url: 'auth/signup',
-    data
-  });
+export async function signup(data: any) {
+  try {
+    return await myRequest.post({
+      url: 'auth/signup',
+      data
+    });
+  } catch (err) {
+    throw err;
+  }
 }
 
-export function signin(data) {
-  return myRequest.post({
-    url: 'auth/signin',
-    data
-  });
+export async function signin(data: any) {
+  try {
+    return await myRequest.post({
+      url: 'auth/signin',
+      data
+    });
+  } catch (err) {
+    throw err;
+  }
 }
