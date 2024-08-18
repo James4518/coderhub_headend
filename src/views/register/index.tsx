@@ -1,25 +1,22 @@
-import React, { ChangeEvent, memo, useState } from 'react';
+import React, { memo, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import {
   Button,
   Form,
-  GetProp,
   Input,
   message,
   Upload,
+  GetProp,
   UploadFile,
   UploadProps
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import {
-  EyeInvisibleOutlined,
-  EyeTwoTone,
-  PlusOutlined
-} from '@ant-design/icons';
+import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { signup } from '@/network/features/auth';
 import { RegisterWrapper } from './style';
 import ImgCrop from 'antd-img-crop';
 import { NAME_REGEX } from '@/constants';
+import { RcFile } from 'antd/es/upload';
 
 interface IProps {
   children?: ReactNode;
@@ -47,7 +44,8 @@ const Register: FC<IProps> = () => {
     imgWindow?.document.write(image.outerHTML);
   };
 
-  const onFinish = (values: any) => {
+  const onFinish = async (values: any) => {
+    console.log(values);
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('password', values.password);
@@ -55,22 +53,61 @@ const Register: FC<IProps> = () => {
     if (values.avatar && values.avatar.length > 0) {
       formData.append('avatar', values.avatar[0].originFileObj);
     }
-
-    signup(formData)
-      .then((res) => {
-        console.log(res);
-        message.success('注册成功！');
-        navigate('/login');
-      })
-      .catch((err) => {
-        console.log(err);
-        message.error('注册失败！');
-      });
+    const res = await signup(formData);
+    if (res.code !== 200) {
+      message.error('注册失败！');
+    } else {
+      message.success('注册成功！');
+      navigate('/login');
+    }
   };
 
-  const onChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
+  const onChange: UploadProps['onChange'] = ({
+    fileList: newFileList
+  }: {
+    fileList: UploadFile[];
+  }) => {
+    console.log('change', newFileList);
     setFileList(newFileList);
     form.setFieldsValue({ avatar: newFileList });
+  };
+
+  const beforeUpload = async (file: File) => {
+    const croppedFile = await new Promise<Blob>((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const img = new Image();
+        img.src = reader.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx?.drawImage(img, 0, 0);
+          canvas.toBlob((blob) => {
+            resolve(blob as Blob);
+          }, file.type);
+        };
+      };
+    });
+
+    const newFile: UploadFile = {
+      uid: `rc-upload-${Date.now()}`,
+      name: file.name,
+      status: 'done' as UploadFile['status'],
+      url: URL.createObjectURL(croppedFile),
+      lastModifiedDate: new Date(),
+      originFileObj: new File([croppedFile], file.name, {
+        type: file.type,
+        lastModified: file.lastModified
+      }) as RcFile
+    };
+    console.log(newFile);
+    setFileList([newFile]);
+    form.setFieldsValue({ avatar: [newFile] });
+    console.log(form.getFieldsValue(true));
+    return false;
   };
 
   return (
@@ -83,7 +120,6 @@ const Register: FC<IProps> = () => {
         wrapperCol={{ span: 16 }}
         style={{ maxWidth: 600 }}
         onFinish={onFinish}
-        autoComplete="off"
       >
         <Form.Item
           label="Username"
@@ -145,18 +181,13 @@ const Register: FC<IProps> = () => {
           <ImgCrop rotationSlider>
             <Upload
               accept=".png, .jpg, .jpeg, .webp"
-              beforeUpload={() => false}
+              beforeUpload={beforeUpload}
               fileList={fileList}
               listType="picture-card"
               onPreview={onPreview}
               onChange={onChange}
             >
-              {fileList.length < 1 && (
-                <div>
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>Upload</div>
-                </div>
-              )}
+              {fileList.length < 1 && '+ Upload'}
             </Upload>
           </ImgCrop>
         </Form.Item>

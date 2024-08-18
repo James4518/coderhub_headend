@@ -1,19 +1,18 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Button, Checkbox, Form, FormProps, Input } from 'antd';
+import { Button, Checkbox, Flex, Form, FormProps, Input } from 'antd';
 import { LoginWrapper } from './style';
+import { EyeInvisibleOutlined, EyeOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
+import { FieldType } from './interface';
 
 interface IProps {
   children?: ReactNode;
 }
-type FieldType = {
-  username?: string;
-  password?: string;
-  remember?: string;
-};
 
 const Login: FC<IProps> = () => {
+  const [passwordVisible, setPasswordVisible] = useState(false);
+
   const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
     console.log('Success:', values);
   };
@@ -35,41 +34,51 @@ const Login: FC<IProps> = () => {
         initialValues={{ remember: true }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
-        autoComplete="off"
       >
         <Form.Item<FieldType>
-          label="Username"
           name="username"
           rules={[{ required: true, message: 'Please input your username!' }]}
         >
-          <Input maxLength={10} />
+          <Input
+            prefix={<UserOutlined />}
+            placeholder="Username"
+            maxLength={10}
+          />
         </Form.Item>
 
         <Form.Item<FieldType>
-          label="Password"
           name="password"
           rules={[{ required: true, message: 'Please input your password!' }]}
         >
-          <Input.Password />
+          <Input.Password
+            prefix={<LockOutlined />}
+            type="password"
+            placeholder="Password"
+            suffix={
+              <Button
+                icon={passwordVisible ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                onClick={() => setPasswordVisible((prevState) => !prevState)}
+                type="text"
+              />
+            }
+            visibilityToggle={{ visible: passwordVisible, onVisibleChange: setPasswordVisible }}
+          />
         </Form.Item>
 
-        <div>
-          <Form.Item<FieldType>
-            name="remember"
-            valuePropName="checked"
-            wrapperCol={{ offset: 6, span: 16 }}
-          >
-            <Checkbox>Remember me</Checkbox>
-          </Form.Item>
-          <Form.Item>
-            <NavLink to="/register">
-              Don&apos;t have an account? Register here
-            </NavLink>
-          </Form.Item>
-        </div>
+        <Form.Item>
+          <Flex justify="space-between" align="center">
+            <Form.Item name="remember" valuePropName="checked" noStyle>
+              <Checkbox>Remember me</Checkbox>
+            </Form.Item>
+            <a href="">Forgot password</a>
+          </Flex>
+        </Form.Item>
 
-        <Form.Item wrapperCol={{ offset: 12, span: 16 }}>
-          <Button type="primary" htmlType="submit">
+        <Form.Item>
+        <NavLink to="/register">
+            Don&apos;t have an account? Register here
+          </NavLink>
+          <Button type="primary" htmlType="submit" style={{marginLeft: 10}}>
             Submit
           </Button>
         </Form.Item>
