@@ -6,12 +6,15 @@ import {
   Input,
   message,
   Upload,
-  GetProp,
   UploadFile,
   UploadProps
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import {
+  EyeInvisibleOutlined,
+  EyeTwoTone,
+  UploadOutlined
+} from '@ant-design/icons';
 import { signup } from '@/network/features/auth';
 import { RegisterWrapper } from './style';
 import ImgCrop from 'antd-img-crop';
@@ -22,19 +25,17 @@ interface IProps {
   children?: ReactNode;
 }
 
-type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
-
 const Register: FC<IProps> = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [file, setFile] = useState<UploadFile | null>(null);
 
   const onPreview = async (file: UploadFile) => {
     let src = file.url as string;
     if (!src) {
       src = await new Promise((resolve) => {
         const reader = new FileReader();
-        reader.readAsDataURL(file.originFileObj as FileType);
+        reader.readAsDataURL(file.originFileObj as RcFile);
         reader.onload = () => resolve(reader.result as string);
       });
     }
@@ -44,14 +45,18 @@ const Register: FC<IProps> = () => {
     imgWindow?.document.write(image.outerHTML);
   };
 
+  const onChange: UploadProps['onChange'] = ({ file: newFile }) => {
+    setFile(newFile);
+    form.setFieldsValue({ avatar: newFile });
+  };
+
   const onFinish = async (values: any) => {
-    console.log(values);
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('password', values.password);
     formData.append('confirmPassword', values.confirmPassword);
-    if (values.avatar && values.avatar.length > 0) {
-      formData.append('avatar', values.avatar[0].originFileObj);
+    if (file && file.originFileObj) {
+      formData.append('avatar', file.originFileObj as RcFile);
     }
     const res = await signup(formData);
     if (res.code !== 200) {
@@ -62,18 +67,8 @@ const Register: FC<IProps> = () => {
     }
   };
 
-  const onChange: UploadProps['onChange'] = ({
-    fileList: newFileList
-  }: {
-    fileList: UploadFile[];
-  }) => {
-    console.log('change', newFileList);
-    setFileList(newFileList);
-    form.setFieldsValue({ avatar: newFileList });
-  };
-
-  const beforeUpload = async (file: File) => {
-    const croppedFile = await new Promise<Blob>((resolve) => {
+  const handleImageProcessing = async (file: RcFile): Promise<Blob> => {
+    return new Promise<Blob>((resolve) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
@@ -91,23 +86,27 @@ const Register: FC<IProps> = () => {
         };
       };
     });
+  };
 
-    const newFile: UploadFile = {
-      uid: `rc-upload-${Date.now()}`,
-      name: file.name,
-      status: 'done' as UploadFile['status'],
-      url: URL.createObjectURL(croppedFile),
-      lastModifiedDate: new Date(),
-      originFileObj: new File([croppedFile], file.name, {
-        type: file.type,
-        lastModified: file.lastModified
-      }) as RcFile
-    };
-    console.log(newFile);
-    setFileList([newFile]);
-    form.setFieldsValue({ avatar: [newFile] });
-    console.log(form.getFieldsValue(true));
-    return false;
+  const customRequest = async (options: any) => {
+    const { file, onSuccess, onError } = options;
+    try {
+      const croppedFile = await handleImageProcessing(file as RcFile);
+      const uploadFile: UploadFile = {
+        uid: file.uid,
+        name: file.name,
+        status: 'done',
+        url: URL.createObjectURL(croppedFile),
+        originFileObj: new File([croppedFile], file.name, {
+          type: file.type,
+          lastModified: file.lastModified
+        }) as RcFile
+      };
+      setFile(uploadFile);
+      onSuccess('Uploaded successfully');
+    } catch (error) {
+      onError(error);
+    }
   };
 
   return (
@@ -130,7 +129,7 @@ const Register: FC<IProps> = () => {
             { pattern: NAME_REGEX, message: '用户名不能有非法字符！' }
           ]}
         >
-          <Input
+          <Input            
             count={{
               show: true,
               max: 10
@@ -172,22 +171,17 @@ const Register: FC<IProps> = () => {
             }
           />
         </Form.Item>
-        <Form.Item
-          label="Upload"
-          name="avatar"
-          valuePropName="fileList"
-          rules={[{ required: true, message: '请上传头像!' }]}
-        >
+        <Form.Item label="Upload" name="avatar">
           <ImgCrop rotationSlider>
             <Upload
               accept=".png, .jpg, .jpeg, .webp"
-              beforeUpload={beforeUpload}
-              fileList={fileList}
+              maxCount={1}
               listType="picture-card"
-              onPreview={onPreview}
+              customRequest={customRequest}
               onChange={onChange}
+              onPreview={onPreview}
             >
-              {fileList.length < 1 && '+ Upload'}
+              {!file && <Button icon={<UploadOutlined />}>Upload</Button>}
             </Upload>
           </ImgCrop>
         </Form.Item>

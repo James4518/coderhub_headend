@@ -1,6 +1,6 @@
 import myRequest from '..';
 import { IRes } from '../interface';
-import { ILoginRes } from '@/views/login/interface';
+import { ILogin, ILoginRes } from '@/views/login/interface';
 import { IRegisterRes } from '@/views/register/interface';
 
 export async function signup(data: FormData): Promise<IRes<IRegisterRes>> {
@@ -10,9 +10,12 @@ export async function signup(data: FormData): Promise<IRes<IRegisterRes>> {
   });
 }
 
-export async function signin(data: FormData): Promise<IRes<ILoginRes>> {
-  return await myRequest.post({
+export function signin(data: ILogin): Promise<IRes<ILoginRes>> {
+  return myRequest.post({
     url: 'auth/signin',
-    data
+    data,
+    headers: {
+      'Content-Type': 'application/json'
+    }
   });
 }

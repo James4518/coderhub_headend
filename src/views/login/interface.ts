@@ -1,15 +1,11 @@
-export interface FieldType {
+export interface ILogin {
   username: string;
   password: string;
-  remember: string;
-};
-
-export interface ILogin {
-  name: string;
-  password: string;
 }
-
+export interface ILoginField extends ILogin {
+  remember: boolean;
+}
 export interface ILoginRes {
   accessToken: string;
-  freshToken: string;
+  refreshToken: string;
 }

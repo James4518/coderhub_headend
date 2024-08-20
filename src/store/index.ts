@@ -6,16 +6,13 @@ import {
   shallowEqual
 } from 'react-redux';
 import homeReducer from './modules/home';
+import { DispatchType, IRootState } from './type';
 
 const store = configureStore({
   reducer: {
     home: homeReducer
   }
 });
-
-type GetStateFnType = typeof store.getState;
-export type IRootState = ReturnType<GetStateFnType>;
-type DispatchType = typeof store.dispatch;
 
 export const useAppSelector: TypedUseSelectorHook<IRootState> = useSelector;
 export const useAppDispatch: () => DispatchType = useDispatch;
