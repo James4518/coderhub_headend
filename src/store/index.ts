@@ -6,11 +6,13 @@ import {
   shallowEqual
 } from 'react-redux';
 import homeReducer from './modules/home';
+import userReducer from './modules/user';
 import { DispatchType, IRootState } from './type';
 
 const store = configureStore({
   reducer: {
-    home: homeReducer
+    home: homeReducer,
+    user: userReducer
   }
 });
 

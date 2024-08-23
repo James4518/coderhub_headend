@@ -1,11 +1,5 @@
-export interface ILogin {
-  username: string;
-  password: string;
-}
+import { ILogin } from '@/network/features/auth/type';
+
 export interface ILoginField extends ILogin {
   remember: boolean;
-}
-export interface ILoginRes {
-  accessToken: string;
-  refreshToken: string;
 }

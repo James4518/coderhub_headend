@@ -1,16 +1,8 @@
-export interface IRegister {
-  name: string;
-  pasword: string;
-  confirmPassword: string;
-  avatar: File;
-}
+import { RcFile } from 'antd/es/upload';
 
-export interface IRegisterRes {
-  id: number;
-  name: string;
-  avatarUrl: string;
-  point: number;
-  level: string;
-  createAt: Date;
-  updateAt: Date;
+export interface IRegisterFields {
+  username: string;
+  password: string;
+  confirmPassword: string;
+  avatar: RcFile;
 }

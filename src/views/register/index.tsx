@@ -1,10 +1,12 @@
-import React, { memo, useState } from 'react';
+import React, { ChangeEvent, memo, useCallback, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import {
   Button,
   Form,
+  FormProps,
   Input,
   message,
+  Tooltip,
   Upload,
   UploadFile,
   UploadProps
@@ -15,11 +17,19 @@ import {
   EyeTwoTone,
   UploadOutlined
 } from '@ant-design/icons';
-import { signup } from '@/network/features/auth';
-import { RegisterWrapper } from './style';
 import ImgCrop from 'antd-img-crop';
-import { NAME_REGEX } from '@/constants';
+import { signup } from '@/network/features/auth';
+import { getFieldNameFromErrorMessage } from '@/utils/common';
+import {
+  LOWSTRENGTH_REGEX,
+  MEDIUMSTRENGTH_REGEX,
+  NAME_REGEX,
+  STRONGSTRENGTH_REGEX
+} from '@/constants';
 import { RcFile } from 'antd/es/upload';
+import { IRegisterFields } from './interface';
+import { RegisterWrapper } from './style';
+import { isAxiosError } from 'axios';
 
 interface IProps {
   children?: ReactNode;
@@ -28,7 +38,24 @@ interface IProps {
 const Register: FC<IProps> = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const [strength, setStrength] = useState('');
   const [file, setFile] = useState<UploadFile | null>(null);
+  const fields = useRef(['username', 'password', 'confirmPassword', 'avatar']);
+  const handlePasswordChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const password = e.target.value;
+      if (STRONGSTRENGTH_REGEX.test(password)) {
+        setStrength('Strong');
+      } else if (MEDIUMSTRENGTH_REGEX.test(password)) {
+        setStrength('Medium');
+      } else if (LOWSTRENGTH_REGEX.test(password)) {
+        setStrength('Low');
+      } else {
+        setStrength('');
+      }
+    },
+    []
+  );
 
   const onPreview = async (file: UploadFile) => {
     let src = file.url as string;
@@ -50,23 +77,35 @@ const Register: FC<IProps> = () => {
     form.setFieldsValue({ avatar: newFile });
   };
 
-  const onFinish = async (values: any) => {
-    const formData = new FormData();
-    formData.append('name', values.name);
-    formData.append('password', values.password);
-    formData.append('confirmPassword', values.confirmPassword);
-    if (file && file.originFileObj) {
-      formData.append('avatar', file.originFileObj as RcFile);
-    }
-    const res = await signup(formData);
-    if (res.code !== 200) {
+  const onFinish = async (values: IRegisterFields) => {
+    const res = await signup({
+      username: values.username,
+      password: values.password,
+      confirmPassword: values.confirmPassword,
+      avatar: file!.originFileObj!
+    });
+    if (res.code !== 200 && isAxiosError(res)) {
       message.error('注册失败！');
+      const errMsg = res.response!.data.message;
+      const name = getFieldNameFromErrorMessage(fields.current, errMsg);
+      form.setFields([
+        {
+          name,
+          errors: [errMsg]
+        }
+      ]);
     } else {
       message.success('注册成功！');
       navigate('/login');
     }
   };
-
+  const onFinishFailed: FormProps<IRegisterFields>['onFinishFailed'] = ({
+    errorFields
+  }) => {
+    errorFields.forEach(({ name, errors }) => {
+      form.setFields([{ name, errors }]);
+    });
+  };
   const handleImageProcessing = async (file: RcFile): Promise<Blob> => {
     return new Promise<Blob>((resolve) => {
       const reader = new FileReader();
@@ -113,23 +152,25 @@ const Register: FC<IProps> = () => {
     <RegisterWrapper>
       <h2>Register</h2>
       <Form
-        name="basic"
+        name="register"
         form={form}
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
         style={{ maxWidth: 600 }}
         onFinish={onFinish}
+        onFinishFailed={onFinishFailed}
+        scrollToFirstError
       >
         <Form.Item
           label="Username"
-          name="name"
+          name="username"
           rules={[
             { required: true, message: '请输入用户名!' },
             { max: 10, message: '用户名不能超过10个字符!' },
             { pattern: NAME_REGEX, message: '用户名不能有非法字符！' }
           ]}
         >
-          <Input            
+          <Input
             count={{
               show: true,
               max: 10
@@ -137,6 +178,7 @@ const Register: FC<IProps> = () => {
           />
         </Form.Item>
         <Form.Item
+          id="passwdItem"
           label="Password"
           name="password"
           rules={[
@@ -144,17 +186,29 @@ const Register: FC<IProps> = () => {
             { min: 6, message: '密码至少6个字符!' }
           ]}
         >
-          <Input.Password
-            iconRender={(visible) =>
-              visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-            }
-          />
+          <Tooltip
+            title={strength ? `Password Strength: ${strength}` : ''}
+            placement="bottomLeft"
+            autoAdjustOverflow={false}
+            visible={!!strength}
+            trigger={['hover']}
+            getPopupContainer={() =>
+              document.querySelector('#passwdItem') || document.body
+            }          
+          >
+            <Input.Password
+              iconRender={(visible) =>
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
+              onChange={handlePasswordChange}
+            />
+          </Tooltip>
         </Form.Item>
         <Form.Item
           label="Confirm Password"
           name="confirmPassword"
           rules={[
-            { required: true, message: '请确认密码!' },
+            { required: true, message: '请输入确认密码!' },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue('password') === value) {

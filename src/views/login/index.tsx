@@ -1,6 +1,6 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Button, Checkbox, Flex, Form, FormProps, Input, message } from 'antd';
 import {
   EyeInvisibleOutlined,
@@ -8,19 +8,22 @@ import {
   LockOutlined,
   UserOutlined
 } from '@ant-design/icons';
+import { useAppDispatch } from '@/store';
+import { fetchUserDataAction } from '../../store/modules/user';
+import { getFieldNameFromErrorMessage } from '@/utils/common';
 import { ILoginField } from './interface';
 import { LoginWrapper } from './style';
-import { fetchUserDataAction } from '../../store/modules/user';
-import { useAppDispatch } from '@/store';
 
 interface IProps {
   children?: ReactNode;
 }
 
 const Login: FC<IProps> = () => {
-  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [form] = Form.useForm();
   const dispatch = useAppDispatch();
-
+  const navigate = useNavigate();
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const fields = useRef(['username', 'password']);
   const onFinish: FormProps<ILoginField>['onFinish'] = async ({
     username,
     password,
@@ -29,31 +32,45 @@ const Login: FC<IProps> = () => {
     const res = await dispatch(
       fetchUserDataAction({ username, password, remember })
     );
-    if (fetchUserDataAction.fulfilled.match(res.payload)) {
+    if (fetchUserDataAction.fulfilled.match(res)) {
       message.success('登录成功！');
+      navigate('/');
     }
-    if (fetchUserDataAction.rejected.match(res.payload)) {
+    if (fetchUserDataAction.rejected.match(res)) {
       message.error('登录失败！');
+      form.setFields([
+        {
+          name: getFieldNameFromErrorMessage(
+            fields.current,
+            res.error.message!
+          ),
+          errors: [res.error.message!]
+        }
+      ]);
     }
   };
 
   const onFinishFailed: FormProps<ILoginField>['onFinishFailed'] = (
-    errorInfo
+    { errorFields }
   ) => {
-    console.log('Failed:', errorInfo);
-  };
+    errorFields.forEach(({ name, errors }) => {
+      form.setFields([{ name, errors }]);
+    });
+  };  
 
   return (
     <LoginWrapper>
       <h2>Login</h2>
       <Form
-        name="basic"
+        name="login"
+        form={form}
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
         style={{ maxWidth: 600 }}
         initialValues={{ remember: true }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
+        scrollToFirstError
       >
         <Form.Item<ILoginField>
           name="username"

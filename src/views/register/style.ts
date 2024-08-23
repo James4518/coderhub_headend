@@ -1,7 +1,7 @@
 import { styled } from 'styled-components';
 
 export const RegisterWrapper = styled.section`
-  #basic {
+  #register {
     margin: 0 auto;
     padding: 50px 0;
   }

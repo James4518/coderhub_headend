@@ -3,6 +3,9 @@ import { signin } from '@/network/features/auth';
 import { IThunkState } from '@/store/type';
 import storageHelper from '@/utils/cache';
 import { ILoginField } from '@/views/login/interface';
+import { IRes } from '@/network/features/interface';
+import { ILoginRes } from '@/network/features/auth/type';
+import { AxiosError } from 'axios';
 
 const UserSlice = createSlice({
   name: 'user',
@@ -28,20 +31,21 @@ const UserSlice = createSlice({
 });
 
 export const fetchUserDataAction: AsyncThunk<
-  boolean,
+  IRes<ILoginRes>,
   ILoginField,
   IThunkState
-> = createAsyncThunk<boolean, ILoginField, IThunkState>(
+> = createAsyncThunk<IRes<ILoginRes>, ILoginField, IThunkState>(
   'userinfo',
   async ({ username, password, remember }, { dispatch }) => {
     const storageType = remember ? 'local' : 'session';
     try {
-      await signin({ username, password });
+      const res: IRes<ILoginRes> = await signin({ username, password });
       storageHelper.setItem('USERNAME', username, storageType);
       dispatch(changeNameAction(username));
-      return true;
+      return res;
     } catch (err) {
-      return false;
+      if (err instanceof AxiosError) err.message = err.response!.data.message;
+      throw err;
     }
   }
 );

@@ -5,7 +5,7 @@ export const LoginWrapper = styled.section`
     text-align: center;
     font-size: 1.8rem;
   }
-  #basic {
+  #login {
     margin: 0 auto;
     padding: 50px 0;
   }
