@@ -50,13 +50,13 @@ const Login: FC<IProps> = () => {
     }
   };
 
-  const onFinishFailed: FormProps<ILoginField>['onFinishFailed'] = (
-    { errorFields }
-  ) => {
+  const onFinishFailed: FormProps<ILoginField>['onFinishFailed'] = ({
+    errorFields
+  }) => {
     errorFields.forEach(({ name, errors }) => {
       form.setFields([{ name, errors }]);
     });
-  };  
+  };
 
   return (
     <LoginWrapper>
