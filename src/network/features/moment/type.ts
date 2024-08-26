@@ -13,7 +13,7 @@ export interface IMoment {
   id: number;
   content: string;
   visibility: MomentVisibility;
-  author: { id: number };
+  author: { id: number; username: string };
   viewCount: number;
   likeCount: number;
   collectCount: number;
@@ -22,4 +22,8 @@ export interface IMoment {
 
 export interface IMomentRes extends IMoment {
   imgList?: string[];
+}
+export interface IMomentListRes {
+  moments: IMoment[];
+  totalCount: number;
 }

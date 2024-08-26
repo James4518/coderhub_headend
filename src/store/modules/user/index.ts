@@ -3,7 +3,7 @@ import { signin } from '@/network/features/auth';
 import { IThunkState } from '@/store/type';
 import storageHelper from '@/utils/cache';
 import { ILoginField } from '@/views/login/interface';
-import { IMomentRes } from '@/network/features/moment/type';
+import { IMoment, IMomentListRes } from '@/network/features/moment/type';
 import { IPageParamsWithId, IRes } from '@/network/features/interface';
 import { ILoginRes } from '@/network/features/auth/type';
 import { AxiosError } from 'axios';
@@ -16,7 +16,8 @@ const UserSlice = createSlice({
       storageHelper.getItem('USERNAME', 'local') ||
       storageHelper.getItem('USERNAME', 'session') ||
       '',
-    moments: [] as IMomentRes[],
+    moments: [] as IMoment[],
+    momentCount: 0,
     point: 0,
     level: ''
   },
@@ -56,16 +57,16 @@ export const fetchUserDataAction: AsyncThunk<
   }
 );
 export const fetchUserMoment: AsyncThunk<
-  IRes<IMomentRes[]>, 
+  IRes<IMomentListRes>,
   IPageParamsWithId,
   IThunkState
-> = createAsyncThunk<IRes<IMomentRes[]>, IPageParamsWithId, IThunkState>(
-  'userMoment', 
-  async ({id, offset = 0, size = 10}, { dispatch })=> {
-    const res = await getUserMoments(id, offset, size);
-    dispatch(changeMomentsAction(res.data));
+> = createAsyncThunk<IRes<IMomentListRes>, IPageParamsWithId, IThunkState>(
+  'userMoment',
+  async ({ id, offset = 0, size = 10 }, { dispatch }) => {
+    const res: IRes<IMomentListRes> = await getUserMoments(id, offset, size);
+    dispatch(changeMomentsAction(res.data.moments));
     return res;
   }
-)
+);
 export default UserSlice.reducer;
 export const { changeNameAction, changeMomentsAction } = UserSlice.actions;

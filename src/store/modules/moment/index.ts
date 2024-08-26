@@ -1,5 +1,5 @@
 import { AsyncThunk, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { IMomentRes } from '@/network/features/moment/type';
+import { IMoment, IMomentListRes } from '@/network/features/moment/type';
 import { getMomentList } from '@/network/features/moment';
 import { IBasePageParams, IRes } from '@/network/features/interface';
 import { IThunkState } from '@/store/type';
@@ -7,26 +7,36 @@ import { IThunkState } from '@/store/type';
 export const MomentSlice = createSlice({
   name: 'moment',
   initialState: {
-    momentList: [] as IMomentRes[]
+    totalCount: 0,
+    momentList: [] as IMoment[]
   },
   reducers: {
-    changeMomentList(state, { payload }) {
-      state.momentList.push(payload);
+    changeTotalCountAction(state, { payload }) {
+      state.totalCount = payload;
+    },
+    changeMomentListAction(state, { payload }) {
+      state.momentList.push(...payload);
     }
   }
 });
 
 export const fetchMomentListAction: AsyncThunk<
-  IRes<IMomentRes[]>,
+  IRes<IMomentListRes>,
   IBasePageParams,
   IThunkState
-> = createAsyncThunk<IRes<IMomentRes[]>, IBasePageParams, IThunkState>(
+> = createAsyncThunk<IRes<IMomentListRes>, IBasePageParams, IThunkState>(
   'moment',
-  async ({ offset = 0, size = 10 }, { dispatch }) => {
+  async ({ offset = 0, size = 10 }, { dispatch, getState }) => {
+    console.log(offset, size);
+    const state = getState();
     const res = await getMomentList(offset, size);
-    dispatch(changeMomentList(res.data));
+    dispatch(changeMomentListAction(res.data.moments));
+    if (res.data.totalCount !== state.moment.totalCount) {
+      dispatch(changeTotalCountAction(res.data.totalCount));
+    }
     return res;
   }
 );
-export const { changeMomentList } = MomentSlice.actions;
+export const { changeTotalCountAction, changeMomentListAction } =
+  MomentSlice.actions;
 export default MomentSlice.reducer;
