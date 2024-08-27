@@ -17,7 +17,7 @@ export interface IMoment {
   viewCount: number;
   likeCount: number;
   collectCount: number;
-  createAt: Date;
+  createAt: string;
 }
 
 export interface IMomentRes extends IMoment {

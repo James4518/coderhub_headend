@@ -4,6 +4,7 @@ import MYRequest from './request';
 const myRequest = new MYRequest({
   baseURL: BASE_URL,
   timeout: TIME_OUT,
+  withCredentials: true,
   interceptor: {
     requestInterceptor: (config) => {
       return config;

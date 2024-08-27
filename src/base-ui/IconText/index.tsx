@@ -1,16 +1,24 @@
+import React, { memo } from 'react';
 import { Space } from 'antd';
-import React, { memo, useState } from 'react';
+import { IPraise } from '@/network/features/praise/type';
 
 export const IconText = ({
   icon: Icon,
-  text
+  text,
+  isActive,
+  action,
+  targetId,
+  iconClick
 }: {
   icon: React.FC;
   text: string | number;
+  isActive: boolean;
+  action: IPraise;
+  targetId: number;
+  iconClick: (action: IPraise, targetId: number) => void;
 }) => {
-  const [isActive, setIsActive] = useState<boolean>(false);
   const handleIconClick = () => {
-    setIsActive(!isActive);
+    iconClick && iconClick(action, targetId);
   };
   return (
     <Space
