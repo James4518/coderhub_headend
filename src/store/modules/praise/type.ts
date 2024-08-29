@@ -1,6 +1,6 @@
 export interface IInitialState {
-  followers: [];
-  followees: [];
-  likes: [];
-  collects: [];
+  followers: number[];
+  followees: number[];
+  likes: number[];
+  collects: number[];
 }

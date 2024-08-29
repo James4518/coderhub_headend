@@ -16,6 +16,9 @@ export const MomentSlice = createSlice({
     },
     changeMomentListAction(state, { payload }) {
       state.momentList.push(...payload);
+    },
+    updateMomentListAction(state, { payload }) {
+      state.momentList = payload;
     }
   }
 });
@@ -27,7 +30,6 @@ export const fetchMomentListAction: AsyncThunk<
 > = createAsyncThunk<IRes<IMomentListRes>, IBasePageParams, IThunkState>(
   'moment',
   async ({ offset = 0, size = 10 }, { dispatch, getState }) => {
-    console.log(offset, size);
     const state = getState();
     const res = await getMomentList(offset, size);
     dispatch(changeMomentListAction(res.data.moments));
@@ -37,6 +39,9 @@ export const fetchMomentListAction: AsyncThunk<
     return res;
   }
 );
-export const { changeTotalCountAction, changeMomentListAction } =
-  MomentSlice.actions;
+export const {
+  changeTotalCountAction,
+  changeMomentListAction,
+  updateMomentListAction
+} = MomentSlice.actions;
 export default MomentSlice.reducer;

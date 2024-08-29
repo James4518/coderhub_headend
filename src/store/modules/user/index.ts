@@ -48,6 +48,7 @@ export const fetchUserDataAction: AsyncThunk<
     try {
       const res: IRes<ILoginRes> = await signin({ username, password });
       storageHelper.setItem('USERNAME', username, storageType);
+      storageHelper.setItem('USERID', res.data.userId);
       dispatch(changeNameAction(username));
       return res;
     } catch (err) {

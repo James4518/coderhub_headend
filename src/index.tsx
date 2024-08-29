@@ -6,7 +6,8 @@ import { ThemeProvider } from 'styled-components';
 
 import App from './App';
 import store from './store';
-import theme from './assets/theme';
+import theme from './assets/context/theme';
+import { UserProvider } from './views/personal/provider';
 import './assets/css/index';
 
 const root = ReactDOM.createRoot(
@@ -15,9 +16,11 @@ const root = ReactDOM.createRoot(
 root.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
-      <HashRouter>
-        <App />
-      </HashRouter>
+      <UserProvider>
+        <HashRouter>
+          <App />
+        </HashRouter>
+      </UserProvider>
     </ThemeProvider>
   </Provider>
 );

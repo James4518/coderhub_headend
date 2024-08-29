@@ -1,5 +1,10 @@
-import axios, { CancelToken, CancelTokenSource } from 'axios';
-import type { AxiosRequestConfig, AxiosInstance, AxiosResponse } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  CancelTokenSource,
+  CancelToken
+} from 'axios';
 
 interface RequestInterceptor<T = AxiosResponse> {
   requestInterceptor?: (config: AxiosRequestConfig) => AxiosRequestConfig;
@@ -16,8 +21,8 @@ export default class hyRequest {
   instance: AxiosInstance;
   interceptors?: RequestInterceptor;
   showLoading?: boolean;
-  private refreshingToken: boolean = false;
-  private cancelTokenSources: Map<string, CancelTokenSource> = new Map();
+  refreshingToken?: boolean;
+  cancelTokenSources: Map<string, CancelTokenSource> = new Map();
   constructor(config: RequestConfig) {
     this.instance = axios.create(config);
     this.interceptors = config.interceptor;
@@ -39,40 +44,6 @@ export default class hyRequest {
         return res.data;
       },
       (error) => {
-        const originalRequest = error.config;
-        if (
-          error.response.status === 401 &&
-          error.response.data.message === 'JWT token has expired'
-        ) {
-          if (!this.refreshingToken) {
-            this.refreshingToken = true;
-            return this.refreshToken()
-              .then(() => {
-                this.refreshingToken = false;
-                this.cancelTokenSources.forEach((source) =>
-                  source.cancel('Request canceled due to token refresh')
-                );
-                this.cancelTokenSources.clear();
-                return this.instance(originalRequest);
-              })
-              .catch((err) => {
-                this.refreshingToken = false;
-                this.cancelTokenSources.forEach((source) =>
-                  source.cancel('Request canceled due to token refresh')
-                );
-                this.cancelTokenSources.clear();
-                return Promise.reject(err);
-              });
-          } else {
-            this.cancelTokenSources.forEach((source) =>
-              source.cancel('Request canceled due to token refresh')
-            );
-            this.cancelTokenSources.clear();
-            return new Promise((resolve) => {
-              this.instance(originalRequest).then((res) => resolve(res));
-            });
-          }
-        }
         return Promise.reject(error);
       }
     );
@@ -84,9 +55,6 @@ export default class hyRequest {
       this.interceptors?.responseInterceptor,
       this.interceptors?.responseInterceptorCatch
     );
-  }
-  private refreshToken() {
-    return axios.post('/auth/refresh');
   }
   request<T>(config: RequestConfig<T>): Promise<T> {
     return new Promise((resolve, reject) => {

@@ -7,6 +7,7 @@ type ItemKey =
   | 'SETTING'
   | 'IS_PLUGIN_INSTALLING'
   | 'REFRESH_TOKEN'
+  | 'USERID'
   | 'USERNAME'
   | 'PASSWORD';
 
@@ -41,7 +42,7 @@ const storageHelper = {
       type === 'session' ? window.sessionStorage : window.localStorage;
     storage?.removeItem(key);
   },
-  getItem: (key: ItemKey, type: StorageType = 'session'): unknown | null => {
+  getItem: (key: ItemKey, type: StorageType = 'session'): string | null => {
     if (typeof window === 'undefined') return null;
     const storage =
       type === 'session' ? window.sessionStorage : window.localStorage;
@@ -58,22 +59,3 @@ const storageHelper = {
 };
 
 export default storageHelper;
-
-// class cache {
-//   setCache(key: string, value: any) {
-//     window.localStorage.setItem(key, JSON.stringify(value));
-//   }
-//   getCache(key: string) {
-//     const value = window.localStorage.getItem(key);
-//     if (value) {
-//       return JSON.parse(value);
-//     }
-//   }
-//   deleteCache(key: string) {
-//     window.localStorage.removeItem(key);
-//   }
-//   clearCache() {
-//     window.localStorage.clear();
-//   }
-// }
-// export default new cache();

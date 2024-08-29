@@ -5,17 +5,16 @@ import {
   useDispatch,
   shallowEqual
 } from 'react-redux';
-import homeReducer from './modules/home';
 import userReducer from './modules/user';
 import momentReducer from './modules/moment';
-import labelReducer from './modules/label';
+import praiseReducer from './modules/praise';
 import { DispatchType, IRootState } from './type';
 
 const store = configureStore({
   reducer: {
-    home: homeReducer,
     user: userReducer,
     moment: momentReducer,
+    praise: praiseReducer
   }
 });
 

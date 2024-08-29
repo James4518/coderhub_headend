@@ -2,42 +2,30 @@ import { IAction, IState } from './type';
 
 function reducer(state: IState, action: IAction) {
   switch (action.type) {
-    case 'ADD_LIKE': {
-      const { key, value } = action.payload;
-      const newLikeMap = new Map(state.like);
-      newLikeMap.set(key, value);
+    case 'ADD_LIKE':
       return {
         ...state,
-        like: newLikeMap
+        like: [...state.like, action.payload].filter(
+          (item, index, self) => self.indexOf(item) === index
+        )
       };
-    }
-    case 'DEL_LIKE': {
-      const { key } = action.payload;
-      const newLikeMap = new Map(state.like);
-      newLikeMap.delete(key);
+    case 'DEL_LIKE':
       return {
         ...state,
-        like: newLikeMap
+        like: state.like.filter((item) => item !== action.payload)
       };
-    }
-    case 'ADD_COLLECT': {
-      const { key, value } = action.payload;
-      const newCollectMap = new Map(state.collect);
-      newCollectMap.set(key, value);
+    case 'ADD_COLLECT':
       return {
         ...state,
-        collect: newCollectMap
+        collect: [...state.collect, action.payload].filter(
+          (item, index, self) => self.indexOf(item) === index
+        )
       };
-    }
-    case 'DEL_COLLECT': {
-      const { key } = action.payload;
-      const newCollectMap = new Map(state.collect);
-      newCollectMap.delete(key);
+    case 'DEL_COLLECT':
       return {
         ...state,
-        collect: newCollectMap
+        collect: state.collect.filter((item) => item !== action.payload)
       };
-    }
     default:
       return state;
   }

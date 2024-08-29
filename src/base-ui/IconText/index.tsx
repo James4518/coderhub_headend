@@ -1,21 +1,23 @@
-import React, { memo } from 'react';
+import React, { FC, memo } from 'react';
 import { Space } from 'antd';
 import { IPraise } from '@/network/features/praise/type';
 
-export const IconText = ({
-  icon: Icon,
-  text,
-  isActive,
-  action,
-  targetId,
-  iconClick
-}: {
+interface IProps {
   icon: React.FC;
   text: string | number;
   isActive: boolean;
   action: IPraise;
   targetId: number;
   iconClick: (action: IPraise, targetId: number) => void;
+}
+
+export const IconText: FC<IProps> = ({
+  icon: Icon,
+  text,
+  isActive,
+  action,
+  targetId,
+  iconClick
 }) => {
   const handleIconClick = () => {
     iconClick && iconClick(action, targetId);

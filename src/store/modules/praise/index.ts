@@ -1,34 +1,69 @@
 import { IRes } from '@/network/features/interface';
-import { praise } from '@/network/features/praise';
-import { IPraise } from '@/network/features/praise/type';
+import { getPraiseInfo, praise } from '@/network/features/praise';
+import { IPraise, IPraiseInfo } from '@/network/features/praise/type';
 import { IThunkState } from '@/store/type';
-import { AsyncThunk, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import {
+  AsyncThunk,
+  createAsyncThunk,
+  createSlice,
+  PayloadAction
+} from '@reduxjs/toolkit';
+import { IInitialState } from './type';
 
+const initialState: IInitialState = {
+  followers: [],
+  followees: [],
+  likes: [],
+  collects: []
+};
 export const PraiseSlice = createSlice({
   name: 'moment',
-  initialState: {
-    followers: [],
-    followees: [],
-    likes: [],
-    collects: []
-  },
+  initialState,
   reducers: {
-    changeFollowersAction(state, { payload }) {
-      state.followers = payload;
+    initAction(state, { payload }) {
+      const { followers, followees, likes, collects } = payload;
+      state.followers = followers;
+      state.followees = followees;
+      state.likes = likes;
+      state.collects = collects;
     },
-    changeFolloweesAction(state, { payload }) {
-      state.followees = payload;
+    changeFollowersAction(state, { payload }: PayloadAction<number>) {
+      const isExist = state.followers.includes(payload);
+      state.followers = isExist
+        ? state.followers.filter((follower) => follower !== payload)
+        : [...state.followers, payload];
     },
-    changeLikesAction(state, { payload }) {
-      state.likes = payload;
+    changeFolloweesAction(state, { payload }: PayloadAction<number>) {
+      const isExist = state.followees.includes(payload);
+      state.followees = isExist
+        ? state.followees.filter((followee) => followee !== payload)
+        : [...state.followees, payload];
     },
-    changeCollectAction(state, { payload }) {
-      state.collects = payload;
+    changeLikesAction(state, { payload }: PayloadAction<number>) {
+      const isExist = state.likes.includes(payload);
+      state.likes = isExist
+        ? state.likes.filter((like) => like !== payload)
+        : [...state.likes, payload];
+    },
+    changeCollectsAction(state, { payload }: PayloadAction<number>) {
+      const isExist = state.collects.includes(payload);
+      state.collects = isExist
+        ? state.collects.filter((collect) => collect !== payload)
+        : [...state.collects, payload];
     }
   }
 });
 
-export const fetchPraiseAction: AsyncThunk<
+export const fetchPraiseAction = createAsyncThunk<
+  IRes<IPraiseInfo>,
+  undefined,
+  IThunkState
+>('praise', async (_, { dispatch }) => {
+  const res = await getPraiseInfo();
+  dispatch(initAction(res.data));
+  return res;
+});
+export const updatePraiseAction: AsyncThunk<
   IRes<string>,
   { action: IPraise; targetId: number },
   IThunkState
@@ -36,7 +71,7 @@ export const fetchPraiseAction: AsyncThunk<
   IRes<string>,
   { action: IPraise; targetId: number },
   IThunkState
->('moment', async ({ action, targetId }, { dispatch }) => {
+>('praise', async ({ action, targetId }, { dispatch }) => {
   const res = await praise(action, targetId);
   switch (action) {
     case IPraise.Follow:
@@ -46,15 +81,16 @@ export const fetchPraiseAction: AsyncThunk<
       dispatch(changeLikesAction(targetId));
       break;
     case IPraise.Collect:
-      dispatch(changeCollectAction(targetId));
+      dispatch(changeCollectsAction(targetId));
       break;
   }
   return res;
 });
 export const {
+  initAction,
   changeFollowersAction,
   changeFolloweesAction,
   changeLikesAction,
-  changeCollectAction
+  changeCollectsAction
 } = PraiseSlice.actions;
 export default PraiseSlice.reducer;

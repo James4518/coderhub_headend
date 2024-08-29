@@ -18,6 +18,5 @@ export interface ILogin {
 }
 
 export interface ILoginRes {
-  accessToken: string;
-  refreshToken: string;
+  userId: number;
 }
