@@ -19,6 +19,9 @@ export const MomentSlice = createSlice({
     },
     updateMomentListAction(state, { payload }) {
       state.momentList = payload;
+    },
+    resetMomentListAction(state) {
+      state.momentList = [];
     }
   }
 });
@@ -42,6 +45,7 @@ export const fetchMomentListAction: AsyncThunk<
 export const {
   changeTotalCountAction,
   changeMomentListAction,
-  updateMomentListAction
+  updateMomentListAction,
+  resetMomentListAction
 } = MomentSlice.actions;
 export default MomentSlice.reducer;

@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import myRequest from '../..';
 import { IRes } from '../interface';
-import { IPraise } from './type';
+import { IPraise, IPraiseInfo } from './type';
 
 export async function praise(
   action: IPraise,
@@ -14,7 +14,7 @@ export async function praise(
     throw err;
   }
 }
-export async function getPraiseInfo() {
+export async function getPraiseInfo(): Promise<IRes<IPraiseInfo>> {
   return await myRequest.get({
     url: '/praise'
   });

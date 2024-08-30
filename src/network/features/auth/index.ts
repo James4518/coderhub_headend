@@ -11,27 +11,31 @@ function createFormData(data: IRegister): FormData {
   formData.append('avatar', data.avatar);
   return formData;
 }
-
-export async function signup(
-  data: IRegister
-): Promise<IRes<IRegisterRes> | AxiosError> {
+export async function signup(data: IRegister): Promise<IRes<IRegisterRes>> {
   const formData = createFormData(data);
   try {
     return await myRequest.post({
       url: 'auth/signup',
       data: formData
     });
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      return error;
-    }
-    throw error;
+  } catch (err) {
+    if (err instanceof AxiosError) err.message = err.response!.data.message;
+    throw err;
   }
 }
-
 export function signin(data: ILogin): Promise<IRes<ILoginRes>> {
+  try {
+    return myRequest.post({
+      url: 'auth/signin',
+      data
+    });
+  } catch (err) {
+    if (err instanceof AxiosError) err.message = err.response!.data.message;
+    throw err;
+  }
+}
+export function signOut(): Promise<IRes> {
   return myRequest.post({
-    url: 'auth/signin',
-    data
+    url: 'auth/signout'
   });
 }

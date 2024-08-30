@@ -15,11 +15,17 @@ import moment, { Moment } from 'moment';
 import { BASE_URL } from '@/network/request/config';
 import IconText from '@/base-ui/IconText';
 import { useAppDispatch, useAppSelector, useAppShallowEqual } from '@/store';
-import { fetchMomentListAction } from '@/store/modules/moment';
+import {
+  fetchMomentListAction,
+  resetMomentListAction,
+  updateMomentListAction
+} from '@/store/modules/moment';
 import { IPraise } from '@/network/features/praise/type';
 import { HomeWrapper } from './style';
-import { fetchPraiseAction } from '@/store/modules/praise';
+import { fetchPraiseAction, updatePraiseAction } from '@/store/modules/praise';
 import reducer from './reducer';
+import { IAction, IState } from './reducer/type';
+import { IMoment } from '@/network/features/moment/type';
 
 interface IProps {
   children?: ReactNode;
@@ -30,22 +36,34 @@ const Home: FC<IProps> = () => {
   const dispatch = useAppDispatch();
   const [listHeight, setListHeight] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const listRef = useRef<HTMLDivElement>(null);
-  const [state, updateState] = useReducer(reducer, {
-    like: new Map(),
-    collect: new Map()
-  });
-  const { totalCount, momentList } = useAppSelector(
+  const { username, totalCount, momentList, likes, collects } = useAppSelector(
     (state) => ({
+      username: state.user.name,
       totalCount: state.moment.totalCount,
-      momentList: state.moment.momentList
+      momentList: state.moment.momentList,
+      likes: state.praise.likes,
+      collects: state.praise.collects
     }),
     useAppShallowEqual
   );
+  const [state, updateState] = useReducer<React.Reducer<IState, IAction>>(
+    reducer,
+    {
+      like: likes,
+      collect: collects
+    }
+  );
   useEffect(() => {
     loadMoreData();
+    return () => {
+      dispatch(resetMomentListAction());
+    };
   }, []);
+  useEffect(() => {
+    username.length > 0 && dispatch(fetchPraiseAction());
+  }, [username]);
   useLayoutEffect(() => {
     const handleResize = () => {
       if (listRef.current) {
@@ -65,10 +83,8 @@ const Home: FC<IProps> = () => {
   const getAvatarUrl = useCallback((id: number) => {
     return `${BASE_URL}/user/avatar/${id}`;
   }, []);
-  const loadMoreData = async () => {
-    if (loading) {
-      return;
-    }
+  const loadMoreData = useCallback(async () => {
+    if (loading) return;
     setLoading(true);
     await dispatch(
       fetchMomentListAction({
@@ -76,49 +92,86 @@ const Home: FC<IProps> = () => {
         size: pageSize
       })
     );
-    setCurrentPage((prev) => {
-      console.log(prev, prev + 1);
-      return prev + 1;
-    });
+    setCurrentPage((prev) => prev + 1);
     setLoading(false);
-  };
+  }, [currentPage]);
   const formartDate = useCallback((dateStr: string) => {
     const date: Moment = moment(dateStr);
     return date.format('YYYY-MM-DD HH:mm:ss');
   }, []);
-  const addLike = (key: number, value: number) => {
+  const handleLike = async (item: number, success: boolean) => {
     updateState({
-      type: 'ADD_LIKE',
-      payload: { key, value }
+      type: success ? 'ADD_LIKE' : 'DEL_LIKE',
+      payload: item
     });
   };
-  const deleteLike = (key: number) => {
+  const handleCollect = async (item: number, success: boolean) => {
     updateState({
-      type: 'DEL_LIKE',
-      payload: { key }
+      type: success ? 'ADD_COLLECT' : 'DEL_COLLECT',
+      payload: item
     });
   };
-  const addCollect = (key: number, value: number) => {
-    updateState({
-      type: 'ADD_COLLECT',
-      payload: { key, value }
+  const updateMomentList = (
+    momentList: IMoment[],
+    targetId: number,
+    action: IPraise,
+    isLike: boolean,
+    isCollect: boolean
+  ) => {
+    return momentList.map((momentItem) => {
+      if (momentItem.id === targetId) {
+        return {
+          ...momentItem,
+          likeCount:
+            action === 'likeMoment'
+              ? isLike
+                ? momentItem.likeCount + 1
+                : momentItem.likeCount - 1
+              : momentItem.likeCount,
+          collectCount:
+            action === 'collect'
+              ? isCollect
+                ? momentItem.collectCount + 1
+                : momentItem.collectCount - 1
+              : momentItem.collectCount
+        };
+      }
+      return momentItem;
     });
   };
-  const deleteCollect = (key: number) => {
-    updateState({
-      type: 'DEL_COLLECT',
-      payload: { key }
-    });
-  };
-  const handleIconClick = async (action: IPraise, targetId: number) => {
-    const res = await fetchPraiseAction({ action, targetId });
-    if (fetchPraiseAction.fulfilled.match(res)) {
-      message.success('操作成功~');
-    }
-    if (fetchPraiseAction.rejected.match(res)) {
-      message.error('操作失败~');
-    }
-  };
+  const handleIconClick = useCallback(
+    async (action: IPraise, targetId: number) => {
+      const isLiked = state.like.includes(targetId);
+      const isCollected = state.collect.includes(targetId);
+      const shouldLike = action === IPraise.likeMoment ? !isLiked : isLiked;
+      const shouldCollect =
+        action === IPraise.Collect ? !isCollected : isCollected;
+      const res = await dispatch(updatePraiseAction({ action, targetId }));
+      if (fetchPraiseAction.fulfilled.match(res)) {
+        if (action === IPraise.likeMoment) {
+          handleLike(targetId, shouldLike);
+        }
+        if (action === IPraise.Collect) {
+          handleCollect(targetId, shouldCollect);
+        }
+        const updatedMomentList = updateMomentList(
+          momentList,
+          targetId,
+          action,
+          shouldLike,
+          shouldCollect
+        );
+        dispatch(updateMomentListAction(updatedMomentList));
+        message.success('操作成功~');
+      }
+      if (fetchPraiseAction.rejected.match(res)) {
+        if (action === IPraise.likeMoment) handleLike(targetId, isLiked);
+        if (action === IPraise.Collect) handleCollect(targetId, isCollected);
+        message.error('操作失败~');
+      }
+    },
+    [state.like, state.collect, momentList]
+  );
   return (
     <HomeWrapper>
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
@@ -143,17 +196,24 @@ const Home: FC<IProps> = () => {
                       icon={LikeOutlined}
                       text={item.likeCount}
                       action={IPraise.likeMoment}
-                      isActive={}
+                      isActive={
+                        likes.includes(item.id) || state.like.includes(item.id)
+                      }
                       targetId={item.id}
                       iconClick={handleIconClick}
+                      key={item.id}
                     />,
                     <IconText
                       icon={StarOutlined}
                       text={item.collectCount}
-                      isActive={}
+                      isActive={
+                        collects.includes(item.id) ||
+                        state.collect.includes(item.id)
+                      }
                       action={IPraise.Collect}
                       targetId={item.id}
                       iconClick={handleIconClick}
+                      key={item.id}
                     />
                   ]}
                   key={item.id}

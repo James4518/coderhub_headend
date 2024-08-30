@@ -1,4 +1,4 @@
-import storageHelper from '@/utils/cache';
+import storageHelper, { StorageType } from '@/utils/cache';
 import React, {
   createContext,
   useState,
@@ -10,27 +10,30 @@ import React, {
 interface IProps {
   children?: ReactNode;
 }
-
 interface UserContextType {
   userId: number | null;
-  setUserId: (id: number) => void;
+  setUserId: (id: number | null) => void;
+  storageType: StorageType;
+  setStorageType: (storageType: StorageType) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
-
 export const UserProvider: FC<IProps> = ({ children }) => {
-  let userIditem: string | number | null =
-    storageHelper.getItem('USERID', 'local') ||
-    storageHelper.getItem('USERID', 'session');
-  if (userIditem !== null) userIditem = parseInt(userIditem, 10);
+  const [storageType, setStorageType] = useState<StorageType>('local');
+  let userIditem: string | number | null = storageHelper.getItem(
+    'USERID',
+    storageType
+  );
+  if (userIditem !== null) userIditem = parseInt(userIditem);
   const [userId, setUserId] = useState<number | null>(userIditem);
   return (
-    <UserContext.Provider value={{ userId, setUserId }}>
+    <UserContext.Provider
+      value={{ userId, setUserId, storageType, setStorageType }}
+    >
       {children}
     </UserContext.Provider>
   );
 };
-
 export const useUser = () => {
   const context = useContext(UserContext);
   if (context === undefined) {

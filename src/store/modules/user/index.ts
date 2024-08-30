@@ -2,7 +2,7 @@ import { AsyncThunk, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { signin } from '@/network/features/auth';
 import { IThunkState } from '@/store/type';
 import storageHelper from '@/utils/cache';
-import { ILoginField } from '@/views/login/interface';
+import { ILoginDetail } from '@/views/login/interface';
 import { IMoment, IMomentListRes } from '@/network/features/moment/type';
 import { IPageParamsWithId, IRes } from '@/network/features/interface';
 import { ILoginRes } from '@/network/features/auth/type';
@@ -39,16 +39,15 @@ const UserSlice = createSlice({
 
 export const fetchUserDataAction: AsyncThunk<
   IRes<ILoginRes>,
-  ILoginField,
+  ILoginDetail,
   IThunkState
-> = createAsyncThunk<IRes<ILoginRes>, ILoginField, IThunkState>(
+> = createAsyncThunk<IRes<ILoginRes>, ILoginDetail, IThunkState>(
   'userinfo',
-  async ({ username, password, remember }, { dispatch }) => {
-    const storageType = remember ? 'local' : 'session';
+  async ({ username, password, storageType }, { dispatch }) => {
     try {
       const res: IRes<ILoginRes> = await signin({ username, password });
       storageHelper.setItem('USERNAME', username, storageType);
-      storageHelper.setItem('USERID', res.data.userId);
+      storageHelper.setItem('USERID', res.data.userId, storageType);
       dispatch(changeNameAction(username));
       return res;
     } catch (err) {

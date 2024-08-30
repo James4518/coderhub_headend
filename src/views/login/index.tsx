@@ -8,13 +8,12 @@ import {
   LockOutlined,
   UserOutlined
 } from '@ant-design/icons';
+import { useUser } from '../personal/provider';
 import { useAppDispatch } from '@/store';
-import { fetchUserDataAction } from '../../store/modules/user';
 import { getFieldNameFromErrorMessage } from '@/utils/common';
+import { fetchUserDataAction } from '../../store/modules/user';
 import { ILoginField } from './interface';
 import { LoginWrapper } from './style';
-import { useUser } from '../personal/provider';
-import storageHelper from '@/utils/cache';
 
 interface IProps {
   children?: ReactNode;
@@ -24,7 +23,7 @@ const Login: FC<IProps> = () => {
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { setUserId } = useUser();
+  const { setStorageType, setUserId } = useUser();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const fields = useRef(['username', 'password']);
   const onFinish: FormProps<ILoginField>['onFinish'] = async ({
@@ -34,11 +33,11 @@ const Login: FC<IProps> = () => {
   }) => {
     const storageType = remember ? 'local' : 'session';
     const res = await dispatch(
-      fetchUserDataAction({ username, password, remember })
+      fetchUserDataAction({ username, password, storageType })
     );
     if (fetchUserDataAction.fulfilled.match(res)) {
       message.success('登录成功！');
-      storageHelper.setItem('USERID', storageType);
+      setStorageType(storageType);
       setUserId(res.payload.data.userId);
       navigate('/');
     }
