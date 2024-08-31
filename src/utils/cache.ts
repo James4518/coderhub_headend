@@ -1,6 +1,7 @@
 type ItemKey =
   | 'ACCESS_TOKEN'
   | 'IS_ADMIN'
+  | 'ISAUTHENTICATED'
   | 'TABS_HISTORY'
   | 'THEME'
   | 'LANGUAGE'

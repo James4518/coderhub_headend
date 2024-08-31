@@ -17,7 +17,12 @@ interface UserContextType {
   setStorageType: (storageType: StorageType) => void;
 }
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType>({
+  userId: null,
+  setUserId: (id: number | null) => {},
+  storageType: 'local',
+  setStorageType: (storageType: StorageType) => {}
+});
 export const UserProvider: FC<IProps> = ({ children }) => {
   const [storageType, setStorageType] = useState<StorageType>('local');
   let userIditem: string | number | null = storageHelper.getItem(
@@ -34,10 +39,4 @@ export const UserProvider: FC<IProps> = ({ children }) => {
     </UserContext.Provider>
   );
 };
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
-  }
-  return context;
-};
+export const useUser = () => useContext(UserContext);

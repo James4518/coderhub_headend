@@ -3,10 +3,10 @@ import type { FC, ReactNode } from 'react';
 import { BellOutlined, SettingOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { RightWrapper } from './style';
-import { useUser } from '@/views/personal/provider';
 import { signOut } from '@/network/features/auth';
+import { useAuth, useUser } from '@/context';
 import storageHelper from '@/utils/cache';
+import { RightWrapper } from './style';
 
 interface IProps {
   children?: ReactNode;
@@ -15,10 +15,11 @@ interface IProps {
 const HeaderRight: FC<IProps> = () => {
   const navigate = useNavigate();
   const { userId, setUserId, storageType } = useUser();
-  console.log(storageType);
+  const { logout } = useAuth();
   const signOutClick = () => {
     signOut();
     setUserId(null);
+    logout();
     storageHelper.clear(storageType);
   };
   return (

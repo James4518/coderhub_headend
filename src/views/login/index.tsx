@@ -1,6 +1,6 @@
 import React, { memo, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Checkbox, Flex, Form, FormProps, Input, message } from 'antd';
 import {
   EyeInvisibleOutlined,
@@ -8,8 +8,8 @@ import {
   LockOutlined,
   UserOutlined
 } from '@ant-design/icons';
-import { useUser } from '../personal/provider';
 import { useAppDispatch } from '@/store';
+import { useAuth, useUser } from '@/context';
 import { getFieldNameFromErrorMessage } from '@/utils/common';
 import { fetchUserDataAction } from '../../store/modules/user';
 import { ILoginField } from './interface';
@@ -23,6 +23,8 @@ const Login: FC<IProps> = () => {
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const { setStorageType, setUserId } = useUser();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const fields = useRef(['username', 'password']);
@@ -39,7 +41,8 @@ const Login: FC<IProps> = () => {
       message.success('登录成功！');
       setStorageType(storageType);
       setUserId(res.payload.data.userId);
-      navigate('/');
+      login();
+      location.pathname == '/login' ? navigate('/') : navigate(0);
     }
     if (fetchUserDataAction.rejected.match(res)) {
       message.error('登录失败！');
@@ -69,9 +72,7 @@ const Login: FC<IProps> = () => {
       <Form
         name="login"
         form={form}
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        style={{ maxWidth: 600 }}
+        style={{ maxWidth: 500 }}
         initialValues={{ remember: true }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}

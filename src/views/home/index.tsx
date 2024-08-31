@@ -26,6 +26,7 @@ import { fetchPraiseAction, updatePraiseAction } from '@/store/modules/praise';
 import reducer from './reducer';
 import { IAction, IState } from './reducer/type';
 import { IMoment } from '@/network/features/moment/type';
+import useProtectedOperation from '@/hooks/useProtectedOperation';
 
 interface IProps {
   children?: ReactNode;
@@ -172,6 +173,9 @@ const Home: FC<IProps> = () => {
     },
     [state.like, state.collect, momentList]
   );
+  const checkClick = useProtectedOperation(() => {
+    handleIconClick;
+  });
   return (
     <HomeWrapper>
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
@@ -200,7 +204,7 @@ const Home: FC<IProps> = () => {
                         likes.includes(item.id) || state.like.includes(item.id)
                       }
                       targetId={item.id}
-                      iconClick={handleIconClick}
+                      iconClick={checkClick}
                       key={item.id}
                     />,
                     <IconText
@@ -212,7 +216,7 @@ const Home: FC<IProps> = () => {
                       }
                       action={IPraise.Collect}
                       targetId={item.id}
-                      iconClick={handleIconClick}
+                      iconClick={checkClick}
                       key={item.id}
                     />
                   ]}
