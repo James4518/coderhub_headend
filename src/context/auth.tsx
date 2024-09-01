@@ -1,11 +1,14 @@
-import storageHelper from '@/utils/cache';
+import storageHelper, { StorageType } from '@/utils/cache';
 import React, {
   createContext,
   useState,
   useContext,
   ReactNode,
-  FC
+  FC,
+  useEffect,
+  useCallback
 } from 'react';
+import { useUser } from './user';
 
 interface IProps {
   children?: ReactNode;
@@ -16,8 +19,8 @@ interface AuthContextType {
   showModal: boolean;
   login: () => void;
   logout: () => void;
-  requireLogin: (callback: () => void) => void;
   setShowModal: (isShow: boolean) => void;
+  requireLogin: (callback: () => void) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -25,41 +28,52 @@ const AuthContext = createContext<AuthContextType>({
   showModal: false,
   login: () => {},
   logout: () => {},
-  requireLogin: () => {},
-  setShowModal: () => {}
+  setShowModal: () => {},
+  requireLogin: () => {}
 });
 
 export const AuthProvider: FC<IProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const savedAuth = storageHelper.getItem('ISAUTHENTICATED','local');
-    return savedAuth == 'true';
+  const { storageType } = useUser();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return storageHelper.getItem('ISAUTHENTICATED', storageType) === 'true';
   });
-  const [showModal, setShowModal] = useState(false);
-  const login = () => {
+  const [showModal, setShowModal] = useState<boolean>(false);
+  useEffect(() => {
+    storageHelper.setItem(
+      'ISAUTHENTICATED',
+      isAuthenticated ? 'true' : 'false',
+      storageType
+    );
+    return () => storageHelper.removeItem('ISAUTHENTICATED', storageType);
+  }, [isAuthenticated, storageType]);
+  const login = useCallback(() => {
     setIsAuthenticated(true);
-    storageHelper.setItem('ISAUTHENTICATED', 'true', 'local');
+    storageHelper.setItem('ISAUTHENTICATED', 'true', storageType);
     setShowModal(false);
-  };
-  const logout = () => { 
+  }, [storageType]);
+  const logout = useCallback(() => {
     setIsAuthenticated(false);
-    storageHelper.removeItem('ISAUTHENTICATED', 'local');
-  }
-  const requireLogin = (callback: () => void) => {
-    if (isAuthenticated) {
-      callback();
-    } else {
-      setShowModal(true);
-    }
-  };
+    storageHelper.removeItem('ISAUTHENTICATED', storageType);
+  }, [storageType]);
+  const requireLogin = useCallback(
+    (callback: () => void) => {
+      if (isAuthenticated) {
+        callback();
+      } else {
+        setShowModal(true);
+      }
+    },
+    [isAuthenticated]
+  );
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
         login,
         logout,
-        requireLogin,
         showModal,
-        setShowModal
+        setShowModal,
+        requireLogin
       }}
     >
       {children}

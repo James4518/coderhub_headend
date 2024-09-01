@@ -1,13 +1,18 @@
 import { useCallback } from 'react';
 import { useAuth } from '@/context';
 
-const useProtectedOperation = (operation: () => void) => {
+const useProtectedOperation = (...operations: ((...args: any[]) => void)[]) => {
   const { requireLogin } = useAuth();
-  const handleOperation = useCallback(() => {
-    requireLogin(() => {
-      operation();
-    });
-  }, [operation, requireLogin]);
+  const handleOperation = useCallback(
+    (...args: any[]) => {
+      requireLogin(() => {
+        operations.forEach((operation) => {
+          operation(...args);
+        });
+      });
+    },
+    [requireLogin, ...operations]
+  );
   return handleOperation;
 };
 

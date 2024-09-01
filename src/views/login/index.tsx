@@ -25,7 +25,7 @@ const Login: FC<IProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-  const { setStorageType, setUserId } = useUser();
+  const { updateUser } = useUser();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const fields = useRef(['username', 'password']);
   const onFinish: FormProps<ILoginField>['onFinish'] = async ({
@@ -39,8 +39,7 @@ const Login: FC<IProps> = () => {
     );
     if (fetchUserDataAction.fulfilled.match(res)) {
       message.success('登录成功！');
-      setStorageType(storageType);
-      setUserId(res.payload.data.userId);
+      updateUser(storageType, res.payload.data.userId);
       login();
       location.pathname == '/login' ? navigate('/') : navigate(0);
     }

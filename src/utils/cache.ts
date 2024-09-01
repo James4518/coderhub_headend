@@ -10,7 +10,8 @@ type ItemKey =
   | 'REFRESH_TOKEN'
   | 'USERID'
   | 'USERNAME'
-  | 'PASSWORD';
+  | 'PASSWORD'
+  | 'STORAGE_TYPE';
 
 export type StorageType = 'session' | 'local';
 

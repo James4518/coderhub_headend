@@ -173,9 +173,9 @@ const Home: FC<IProps> = () => {
     },
     [state.like, state.collect, momentList]
   );
-  const checkClick = useProtectedOperation(() => {
-    handleIconClick;
-  });
+  const checkClick = useProtectedOperation(
+    (action: IPraise, targetId: number) => handleIconClick(action, targetId)
+  );
   return (
     <HomeWrapper>
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
