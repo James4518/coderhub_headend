@@ -22,8 +22,12 @@ const HeaderRight: FC<IProps> = () => {
     logout();
     storageHelper.clear(storageType);
   };
+  const createBtnClick = () => {
+    navigate('/creator');
+  };
   return (
     <RightWrapper>
+      <Button onClick={createBtnClick}>创作者中心</Button>
       {userId ? (
         <Button type="primary" onClick={signOutClick}>
           登出

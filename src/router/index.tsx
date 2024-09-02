@@ -6,6 +6,8 @@ const Register = lazy(() => import('@/views/register'));
 const Login = lazy(() => import('@/views/login'));
 const Personal = lazy(() => import('@/views/personal'));
 const NotFound = lazy(() => import('@/views/notFound'));
+const Creater = lazy(() => import('@/views/creator'));
+const Publish = lazy(() => import('@/views/creator/cpns/publish'));
 
 const routes: RouteObject[] = [
   {
@@ -27,6 +29,16 @@ const routes: RouteObject[] = [
   {
     path: '/personal',
     element: <Personal />
+  },
+  {
+    path: '/creator',
+    element: <Creater />,
+    children: [
+      {
+        path: '/creator/publish',
+        element: <Publish />
+      }
+    ]
   },
   {
     path: '*',

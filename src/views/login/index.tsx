@@ -39,8 +39,8 @@ const Login: FC<IProps> = () => {
     );
     if (fetchUserDataAction.fulfilled.match(res)) {
       message.success('登录成功！');
-      updateUser(storageType, res.payload.data.userId);
-      login();
+      await updateUser(storageType, res.payload.data.userId);
+      await login();
       location.pathname == '/login' ? navigate('/') : navigate(0);
     }
     if (fetchUserDataAction.rejected.match(res)) {
