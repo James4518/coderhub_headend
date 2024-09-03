@@ -8,7 +8,7 @@ function App() {
     <div className="App relative">
       <AppHeader />
       <Suspense fallback="">
-        <main className="bg-slate-200">
+        <main className="bg-slate-200 pt-4">
           <div className="w-10/12 mx-auto">{useRoutes(routes)}</div>
         </main>
       </Suspense>

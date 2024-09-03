@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import {
   Button,
@@ -19,6 +19,8 @@ import { RcFile } from 'antd/es/upload';
 import { PublishField } from './type';
 import { UploadOutlined } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
+import { BASE_URL } from '@/network/request/config';
+import { postMoment } from '@/network/features/moment';
 
 interface IProps {
   children?: ReactNode;
@@ -36,7 +38,9 @@ const Publish: FC<IProps> = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const url = useRef(`${BASE_URL}/file/picture`);
   const currentDate = dayjs();
+  const newDate = currentDate.add(1, 'minute');
   const disabledDate = (current: Dayjs): boolean => {
     return current && current.isBefore(currentDate.startOf('day'));
   };
@@ -74,10 +78,11 @@ const Publish: FC<IProps> = () => {
     setPreviewImage(file.url || (file.preview as string));
     setPreviewOpen(true);
   };
-  const beforeUpload = (file: RcFile): Promise<Blob | RcFile> => {
-    return new Promise((resolve) => {
+  const customRequest = async (options: any) => {
+    const { file, onSuccess, onError } = options;
+    try {
       const reader = new FileReader();
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file as RcFile);
       reader.onload = () => {
         const img = document.createElement('img');
         img.src = reader.result as string;
@@ -105,29 +110,57 @@ const Publish: FC<IProps> = () => {
             canvas.height - 20
           );
           canvas.toBlob((blob) => {
-            resolve(blob || file);
-          });
+            console.log(blob);
+            if (blob) {
+              const newFile = new File([blob], file.name, { type: file.type });
+              onSuccess(newFile, file);
+              console.log(file, newFile);
+              console.log(onSuccess(newFile, file));
+            } else {
+              onError(new Error('Failed to process image'));
+            }
+          }, file.type);
+        };
+        img.onerror = (error) => {
+          onError(error);
         };
       };
-    });
+      reader.onerror = (error) => {
+        onError(error);
+      };
+    } catch (error) {
+      onError(error);
+    }
   };
-  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) =>
+  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
     setFileList(newFileList);
-  const onFinish: FormProps<PublishField>['onFinish'] = (values) => {
-    console.log('Success:', values);
+  };
+  const onFinish: FormProps<PublishField>['onFinish'] = async (values) => {
+    if (values.publishTime) values.publishTime = new Date(values.publishTime);
+    console.log('Form Values:', values);
+    const res = await postMoment({
+      content: values.content,
+      visibility: values.visibility
+    });
+    console.log(res);
   };
   const onFinishFailed: FormProps<PublishField>['onFinishFailed'] = (
     errorInfo
   ) => {
     console.log('Failed:', errorInfo);
   };
+  const handleDraftClick = () => {};
   return (
     <Form
-      name="basic"
+      name="publish"
       labelCol={{ span: 8 }}
       wrapperCol={{ span: 16 }}
-      style={{ maxWidth: 600 }}
-      initialValues={{ remember: true }}
+      style={{ maxWidth: 900 }}
+      initialValues={{
+        isNow: immediatePublish,
+        publishTime: newDate,
+        visibility: 'public'
+      }}
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
       autoComplete="off"
@@ -139,9 +172,10 @@ const Publish: FC<IProps> = () => {
         <div>
           <Upload
             maxCount={9}
-            beforeUpload={beforeUpload}
+            action={url.current}
             listType="picture-card"
             fileList={fileList}
+            customRequest={customRequest}
             onPreview={handlePreview}
             onChange={handleChange}
           >
@@ -160,9 +194,9 @@ const Publish: FC<IProps> = () => {
           )}
         </div>
       </Form.Item>
-      <Form.Item label="可见">
-        <Select defaultValue="publish">
-          <Select.Option value="publish">公开</Select.Option>
+      <Form.Item label="可见" name="visibility">
+        <Select>
+          <Select.Option value="public">公开</Select.Option>
           <Select.Option value="friends">好友</Select.Option>
           <Select.Option value="private">私密</Select.Option>
         </Select>
@@ -177,13 +211,12 @@ const Publish: FC<IProps> = () => {
             format="YYYY-MM-DD HH:mm"
             disabledDate={disabledDate}
             disabledTime={disabledTime}
-            defaultValue={currentDate}
           />
         </Form.Item>
       )}
-      <Form.Item>
+      <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
         <Flex justify="space-between" align="center">
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" onClick={handleDraftClick}>
             存草稿
           </Button>
           <Button type="primary" htmlType="submit">

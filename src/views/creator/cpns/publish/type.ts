@@ -1,10 +1,10 @@
-export enum Visibility {
-  PUBLIC = 'public',
-  FRIENDS = 'friends',
-  PRIVATE = 'private'
-}
+import { MomentVisibility } from '@/network/features/moment/type';
+import { RcFile } from 'antd/es/upload';
 
 export interface PublishField {
   content: string;
-  visibility: Visibility;
+  visibility: MomentVisibility;
+  picture: RcFile[];
+  isNow: boolean;
+  publishTime?: Date;
 }
