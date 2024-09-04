@@ -15,12 +15,13 @@ import {
   Flex
 } from 'antd';
 import { useAppSelector, useAppShallowEqual } from '@/store';
-import { RcFile } from 'antd/es/upload';
-import { PublishField } from './type';
+import { RcFile, UploadChangeParam } from 'antd/es/upload';
 import { UploadOutlined } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import { BASE_URL } from '@/network/request/config';
 import { postMoment } from '@/network/features/moment';
+import { PublishField } from './type';
+import { createMomentPictures } from '@/network/features/file';
 
 interface IProps {
   children?: ReactNode;
@@ -110,12 +111,22 @@ const Publish: FC<IProps> = () => {
             canvas.height - 20
           );
           canvas.toBlob((blob) => {
-            console.log(blob);
             if (blob) {
-              const newFile = new File([blob], file.name, { type: file.type });
-              onSuccess(newFile, file);
-              console.log(file, newFile);
-              console.log(onSuccess(newFile, file));
+              const newFile = new File([blob], file.name, {
+                type: file.type,
+                lastModified: file.lastModified
+              });
+              const newRcFile: RcFile = Object.assign(newFile, {
+                uid: file.uid,
+                lastModified: file.lastModified,
+                lastModifiedDate: file.lastModifiedDate
+              });
+              setFileList((prevList) =>
+                prevList.map((f) =>
+                  f.uid === file.uid ? { ...f, originFileObj: newRcFile } : f
+                )
+              );
+              onSuccess(newRcFile, file);
             } else {
               onError(new Error('Failed to process image'));
             }
@@ -132,17 +143,31 @@ const Publish: FC<IProps> = () => {
       onError(error);
     }
   };
-  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    setFileList(newFileList);
+  const handleChange = (info: UploadChangeParam) => {
+    if (info.file.status === 'done') {
+      console.log('Upload successful:', info.file.response);
+    } else if (info.file.status === 'error') {
+      console.log('Upload failed:', info.file.error);
+    }
+    setFileList(info.fileList);
   };
   const onFinish: FormProps<PublishField>['onFinish'] = async (values) => {
     if (values.publishTime) values.publishTime = new Date(values.publishTime);
     console.log('Form Values:', values);
+    const pictures = fileList
+      .map((file) => file?.originFileObj)
+      .filter((file): file is RcFile => !!file);
+    console.log(pictures);
     const res = await postMoment({
       content: values.content,
       visibility: values.visibility
     });
-    console.log(res);
+    if (pictures.length !== 0) {
+      await createMomentPictures({
+        momentId: res.data.id.toString(),
+        pictures
+      });
+    }
   };
   const onFinishFailed: FormProps<PublishField>['onFinishFailed'] = (
     errorInfo
@@ -172,12 +197,14 @@ const Publish: FC<IProps> = () => {
         <div>
           <Upload
             maxCount={9}
-            action={url.current}
+            beforeUpload={() => false}
+            customRequest={customRequest}
             listType="picture-card"
             fileList={fileList}
-            customRequest={customRequest}
             onPreview={handlePreview}
             onChange={handleChange}
+            withCredentials={true}
+            name="pictures"
           >
             <Button icon={<UploadOutlined />}>Upload</Button>
           </Upload>
