@@ -10,6 +10,7 @@ import {
 import IconContent from '@/assets/icons/content';
 import useProtectedOperation from '@/hooks/useProtectedOperation';
 import { CreatorWrapper } from './style';
+import withAuth from '@/base-ui/witAuth';
 
 interface IProps {
   children?: ReactNode;
@@ -73,4 +74,4 @@ const Creator: FC<IProps> = () => {
   );
 };
 
-export default memo(Creator);
+export default withAuth(memo(Creator));

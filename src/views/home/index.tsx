@@ -140,39 +140,40 @@ const Home: FC<IProps> = () => {
       return momentItem;
     });
   };
-  const handleIconClick = useCallback(
-    async (action: IPraise, targetId: number) => {
-      const isLiked = state.like.includes(targetId);
-      const isCollected = state.collect.includes(targetId);
-      const shouldLike = action === IPraise.likeMoment ? !isLiked : isLiked;
-      const shouldCollect =
-        action === IPraise.Collect ? !isCollected : isCollected;
-      const res = await dispatch(updatePraiseAction({ action, targetId }));
-      if (fetchPraiseAction.fulfilled.match(res)) {
-        if (action === IPraise.likeMoment) {
-          handleLike(targetId, shouldLike);
+  const handleIconClick: (action: IPraise, targetId: number) => Promise<void> =
+    useCallback(
+      async (action: IPraise, targetId: number) => {
+        const isLiked = state.like.includes(targetId);
+        const isCollected = state.collect.includes(targetId);
+        const shouldLike = action === IPraise.likeMoment ? !isLiked : isLiked;
+        const shouldCollect =
+          action === IPraise.Collect ? !isCollected : isCollected;
+        const res = await dispatch(updatePraiseAction({ action, targetId }));
+        if (fetchPraiseAction.fulfilled.match(res)) {
+          if (action === IPraise.likeMoment) {
+            handleLike(targetId, shouldLike);
+          }
+          if (action === IPraise.Collect) {
+            handleCollect(targetId, shouldCollect);
+          }
+          const updatedMomentList = updateMomentList(
+            momentList,
+            targetId,
+            action,
+            shouldLike,
+            shouldCollect
+          );
+          dispatch(updateMomentListAction(updatedMomentList));
+          message.success('操作成功~');
         }
-        if (action === IPraise.Collect) {
-          handleCollect(targetId, shouldCollect);
+        if (fetchPraiseAction.rejected.match(res)) {
+          if (action === IPraise.likeMoment) handleLike(targetId, isLiked);
+          if (action === IPraise.Collect) handleCollect(targetId, isCollected);
+          message.error('操作失败~');
         }
-        const updatedMomentList = updateMomentList(
-          momentList,
-          targetId,
-          action,
-          shouldLike,
-          shouldCollect
-        );
-        dispatch(updateMomentListAction(updatedMomentList));
-        message.success('操作成功~');
-      }
-      if (fetchPraiseAction.rejected.match(res)) {
-        if (action === IPraise.likeMoment) handleLike(targetId, isLiked);
-        if (action === IPraise.Collect) handleCollect(targetId, isCollected);
-        message.error('操作失败~');
-      }
-    },
-    [state.like, state.collect, momentList]
-  );
+      },
+      [state.like, state.collect, momentList]
+    );
   const checkClick = useProtectedOperation(
     (action: IPraise, targetId: number) => handleIconClick(action, targetId)
   );

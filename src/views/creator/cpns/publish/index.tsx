@@ -1,4 +1,4 @@
-import React, { memo, useRef, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import {
   Button,
@@ -12,40 +12,56 @@ import {
   UploadFile,
   UploadProps,
   FormProps,
-  Flex
+  Flex,
+  Tag,
+  Result
 } from 'antd';
-import { useAppSelector, useAppShallowEqual } from '@/store';
-import { RcFile, UploadChangeParam } from 'antd/es/upload';
+import { useAppDispatch, useAppSelector, useAppShallowEqual } from '@/store';
+import { RcFile } from 'antd/es/upload';
 import { UploadOutlined } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
-import { BASE_URL } from '@/network/request/config';
+import withAuth from '@/base-ui/witAuth';
 import { postMoment } from '@/network/features/moment';
-import { PublishField } from './type';
 import { createMomentPictures } from '@/network/features/file';
+import { fetchLabelsAction } from '@/store/modules/label';
+import { ILabelsName } from '@/store/modules/label/type';
+import { PublishField } from './type';
+import { useNavigate } from 'react-router-dom';
 
 interface IProps {
   children?: ReactNode;
 }
 
+const { useForm } = Form;
+const { TextArea } = Input;
+const { CheckableTag } = Tag;
 const Publish: FC<IProps> = () => {
-  const { TextArea } = Input;
-  const { username } = useAppSelector(
+  const [form] = useForm();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [uploading, setUploading] = useState<boolean>(false);
+  const [immediatePublish, setImmediatePublish] = useState<boolean>(true);
+  const [previewOpen, setPreviewOpen] = useState<boolean>(false);
+  const [previewImage, setPreviewImage] = useState<string>('');
+  const [selectedTags, setSelectedTags] = useState<ILabelsName>([]);
+  const [result, setReSult] = useState<boolean>(false);
+  const { username, labels } = useAppSelector(
     (state) => ({
-      username: state.user.name
+      username: state.user.name,
+      labels: state.label.labels
     }),
     useAppShallowEqual
   );
-  const [immediatePublish, setImmediatePublish] = useState(true);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState('');
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const url = useRef(`${BASE_URL}/file/picture`);
+  useEffect(() => {
+    !labels.length && dispatch(fetchLabelsAction({}));
+  }, []);
   const currentDate = dayjs();
   const newDate = currentDate.add(1, 'minute');
   const disabledDate = (current: Dayjs): boolean => {
     return current && current.isBefore(currentDate.startOf('day'));
   };
-  const disabledTime = (selectedDate: Dayjs | null) => {
+  const disabledTime = (selectedDate: Dayjs) => {
     if (selectedDate && selectedDate.isSame(currentDate, 'day')) {
       return {
         disabledHours: () =>
@@ -72,18 +88,10 @@ const Publish: FC<IProps> = () => {
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = (error) => reject(error);
     });
-  const handlePreview = async (file: UploadFile) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj as RcFile);
-    }
-    setPreviewImage(file.url || (file.preview as string));
-    setPreviewOpen(true);
-  };
-  const customRequest = async (options: any) => {
-    const { file, onSuccess, onError } = options;
-    try {
+  const addWater = (file: RcFile): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.readAsDataURL(file as RcFile);
+      reader.readAsDataURL(file);
       reader.onload = () => {
         const img = document.createElement('img');
         img.src = reader.result as string;
@@ -95,69 +103,83 @@ const Publish: FC<IProps> = () => {
           ctx.drawImage(img, 0, 0);
           ctx.fillStyle = 'white';
           ctx.textBaseline = 'middle';
-          ctx.font = '20px Arial';
-          const coderhubText = 'coderhub';
+          ctx.font = '12px Arial';
+          const coderhubText = 'coderhub社区';
           const usernameText = `by ${username}`;
           const coderhubWidth = ctx.measureText(coderhubText).width;
           const usernameWidth = ctx.measureText(usernameText).width;
           ctx.fillText(
             coderhubText,
             canvas.width - coderhubWidth - 20,
-            canvas.height - 50
+            canvas.height - 35
           );
           ctx.fillText(
             usernameText,
             canvas.width - usernameWidth - 20,
             canvas.height - 20
           );
-          canvas.toBlob((blob) => {
-            if (blob) {
-              const newFile = new File([blob], file.name, {
-                type: file.type,
-                lastModified: file.lastModified
-              });
-              const newRcFile: RcFile = Object.assign(newFile, {
-                uid: file.uid,
-                lastModified: file.lastModified,
-                lastModifiedDate: file.lastModifiedDate
-              });
-              setFileList((prevList) =>
-                prevList.map((f) =>
-                  f.uid === file.uid ? { ...f, originFileObj: newRcFile } : f
-                )
-              );
-              onSuccess(newRcFile, file);
+          canvas.toBlob((result) => {
+            if (result) {
+              resolve(result);
             } else {
-              onError(new Error('Failed to process image'));
+              reject(new Error('Canvas to Blob conversion failed'));
             }
           }, file.type);
         };
-        img.onerror = (error) => {
-          onError(error);
-        };
+        img.onerror = () => reject(new Error('Image load failed'));
       };
-      reader.onerror = (error) => {
-        onError(error);
+      reader.onerror = () => reject(new Error('FileReader read failed'));
+    });
+  };
+  const customRequest = async (options: any) => {
+    const { file, onSuccess, onError } = options;
+    setUploading(true);
+    try {
+      const waterFile = await addWater(file as RcFile);
+      const uploadFile: UploadFile = {
+        uid: file.uid,
+        name: file.name,
+        status: 'done',
+        url: URL.createObjectURL(waterFile),
+        originFileObj: new File([waterFile], file.name, {
+          type: file.type,
+          lastModified: file.lastModified
+        }) as RcFile
       };
+      setFileList((prevList) => {
+        return prevList.map((f) => (f.uid === file.uid ? uploadFile : f));
+      });
+      onSuccess('Uploaded successfully', uploadFile);
     } catch (error) {
       onError(error);
+    } finally {
+      setUploading(false);
     }
   };
-  const handleChange = (info: UploadChangeParam) => {
-    if (info.file.status === 'done') {
-      console.log('Upload successful:', info.file.response);
-    } else if (info.file.status === 'error') {
-      console.log('Upload failed:', info.file.error);
+  const onChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+    if (!uploading) {
+      setFileList(newFileList);
     }
-    setFileList(info.fileList);
+  };
+  const handlePreview = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as RcFile);
+    }
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+  };
+  const changeTags = (tag: string, checked: boolean) => {
+    const nextSelectedTags = checked
+      ? [...selectedTags, tag]
+      : selectedTags.filter((t) => t !== tag);
+    setSelectedTags(nextSelectedTags);
+    form.setFieldsValue({ labels: nextSelectedTags });
   };
   const onFinish: FormProps<PublishField>['onFinish'] = async (values) => {
     if (values.publishTime) values.publishTime = new Date(values.publishTime);
-    console.log('Form Values:', values);
     const pictures = fileList
       .map((file) => file?.originFileObj)
       .filter((file): file is RcFile => !!file);
-    console.log(pictures);
     const res = await postMoment({
       content: values.content,
       visibility: values.visibility
@@ -168,16 +190,38 @@ const Publish: FC<IProps> = () => {
         pictures
       });
     }
+    setReSult(true);
   };
-  const onFinishFailed: FormProps<PublishField>['onFinishFailed'] = (
-    errorInfo
-  ) => {
-    console.log('Failed:', errorInfo);
+  const onFinishFailed: FormProps<PublishField>['onFinishFailed'] = ({
+    errorFields
+  }) => {
+    const errors = errorFields.map(({ name, errors }) => ({
+      name: name as (string | number)[],
+      errors
+    }));
+    form.setFields(errors);
   };
-  const handleDraftClick = () => {};
-  return (
+  const handleDraftClick = () => {
+    navigate('');
+  };
+  return result ? (
+    <Result
+      status="success"
+      title="发布成功!"
+      subTitle="待管理员审核，预计24小时内~~"
+      extra={[
+        <Button key="home" onClick={() => navigate('/')}>
+          回首页
+        </Button>,
+        <Button key="creator" onClick={() => navigate('/creator/publish')}>
+          回创作中心
+        </Button>
+      ]}
+    />
+  ) : (
     <Form
       name="publish"
+      form={form}
       labelCol={{ span: 8 }}
       wrapperCol={{ span: 16 }}
       style={{ maxWidth: 900 }}
@@ -190,21 +234,20 @@ const Publish: FC<IProps> = () => {
       onFinishFailed={onFinishFailed}
       autoComplete="off"
     >
-      <Form.Item label="content" name="content">
+      <Form.Item label="content" name="content" required={true}>
         <TextArea />
       </Form.Item>
-      <Form.Item label="pictures" name="picture">
+      <Form.Item label="pictures" name="pictures">
         <div>
           <Upload
+            name="pictures"
+            withCredentials={true}
             maxCount={9}
-            beforeUpload={() => false}
-            customRequest={customRequest}
             listType="picture-card"
             fileList={fileList}
             onPreview={handlePreview}
-            onChange={handleChange}
-            withCredentials={true}
-            name="pictures"
+            onChange={onChange}
+            customRequest={customRequest}
           >
             <Button icon={<UploadOutlined />}>Upload</Button>
           </Upload>
@@ -221,7 +264,20 @@ const Publish: FC<IProps> = () => {
           )}
         </div>
       </Form.Item>
-      <Form.Item label="可见" name="visibility">
+      <Form.Item label="标签" name="labels" required={true}>
+        <Flex gap={5} wrap align="center">
+          {labels.map<React.ReactNode>((label) => (
+            <CheckableTag
+              key={label.id}
+              checked={selectedTags.includes(label.name)}
+              onChange={(checked) => changeTags(label.name, checked)}
+            >
+              {label.name}
+            </CheckableTag>
+          ))}
+        </Flex>
+      </Form.Item>
+      <Form.Item label="可见" name="visibility" required={true}>
         <Select>
           <Select.Option value="public">公开</Select.Option>
           <Select.Option value="friends">好友</Select.Option>
@@ -254,5 +310,4 @@ const Publish: FC<IProps> = () => {
     </Form>
   );
 };
-
-export default memo(Publish);
+export default withAuth(memo(Publish));
