@@ -1,10 +1,11 @@
 import myRequest from '../..';
 import { IRes } from '../interface';
 import { ILabel } from './type';
+import { ILabelsName } from '@/store/modules/label/type';
 
 export async function addMomentLabel(
   id: number,
-  data: ILabel[]
+  data: ILabelsName[]
 ): Promise<IRes<string>> {
   return await myRequest.post({
     url: `moment/labels/:${id}`,
@@ -26,7 +27,7 @@ export async function getLabelMoments(
   size = 10
 ): Promise<IRes<ILabel[]>> {
   return await myRequest.get({
-    url: `label/:${labelName}`,
+    url: `moment/label/${labelName}`,
     params: { offset, size }
   });
 }

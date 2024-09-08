@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Button,
   DatePicker,
@@ -23,10 +24,10 @@ import dayjs, { Dayjs } from 'dayjs';
 import withAuth from '@/base-ui/witAuth';
 import { postMoment } from '@/network/features/moment';
 import { createMomentPictures } from '@/network/features/file';
+import { addMomentLabel } from '@/network/features/label';
 import { fetchLabelsAction } from '@/store/modules/label';
 import { ILabelsName } from '@/store/modules/label/type';
 import { PublishField } from './type';
-import { useNavigate } from 'react-router-dom';
 
 interface IProps {
   children?: ReactNode;
@@ -44,12 +45,12 @@ const Publish: FC<IProps> = () => {
   const [immediatePublish, setImmediatePublish] = useState<boolean>(true);
   const [previewOpen, setPreviewOpen] = useState<boolean>(false);
   const [previewImage, setPreviewImage] = useState<string>('');
-  const [selectedTags, setSelectedTags] = useState<ILabelsName>([]);
+  const [labels, setLabels] = useState<ILabelsName>([]);
   const [result, setReSult] = useState<boolean>(false);
-  const { username, labels } = useAppSelector(
+  const { username, labelList } = useAppSelector(
     (state) => ({
       username: state.user.name,
-      labels: state.label.labels
+      labelList: state.label.labels
     }),
     useAppShallowEqual
   );
@@ -168,12 +169,13 @@ const Publish: FC<IProps> = () => {
     setPreviewImage(file.url || (file.preview as string));
     setPreviewOpen(true);
   };
-  const changeTags = (tag: string, checked: boolean) => {
-    const nextSelectedTags = checked
-      ? [...selectedTags, tag]
-      : selectedTags.filter((t) => t !== tag);
-    setSelectedTags(nextSelectedTags);
-    form.setFieldsValue({ labels: nextSelectedTags });
+  const changeLabels = (label: string, checked: boolean) => {
+    const newLabels = checked
+      ? [...labels, label]
+      : labels.filter((t) => t !== label);
+    console.log(newLabels);
+    setLabels(newLabels);
+    form.setFieldsValue({ labels: newLabels });
   };
   const onFinish: FormProps<PublishField>['onFinish'] = async (values) => {
     if (values.publishTime) values.publishTime = new Date(values.publishTime);
@@ -190,6 +192,7 @@ const Publish: FC<IProps> = () => {
         pictures
       });
     }
+    await addMomentLabel(res.data.id, values.labels);
     setReSult(true);
   };
   const onFinishFailed: FormProps<PublishField>['onFinishFailed'] = ({
@@ -202,7 +205,7 @@ const Publish: FC<IProps> = () => {
     form.setFields(errors);
   };
   const handleDraftClick = () => {
-    navigate('');
+    navigate('/draft');
   };
   return result ? (
     <Result
@@ -220,21 +223,26 @@ const Publish: FC<IProps> = () => {
     />
   ) : (
     <Form
-      name="publish"
       form={form}
+      name="publish"
       labelCol={{ span: 8 }}
       wrapperCol={{ span: 16 }}
       style={{ maxWidth: 900 }}
       initialValues={{
+        visibility: 'public',
+        labels: labels,
         isNow: immediatePublish,
-        publishTime: newDate,
-        visibility: 'public'
+        publishTime: newDate
       }}
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
       autoComplete="off"
     >
-      <Form.Item label="content" name="content" required={true}>
+      <Form.Item
+        label="content"
+        name="content"
+        rules={[{ required: true, message: '内容不能为空~' }]}
+      >
         <TextArea />
       </Form.Item>
       <Form.Item label="pictures" name="pictures">
@@ -264,20 +272,24 @@ const Publish: FC<IProps> = () => {
           )}
         </div>
       </Form.Item>
-      <Form.Item label="标签" name="labels" required={true}>
+      <Form.Item
+        label="标签"
+        name="labels"
+        rules={[{ required: true, message: '标签必选~' }]}
+      >
         <Flex gap={5} wrap align="center">
-          {labels.map<React.ReactNode>((label) => (
+          {labelList.map<React.ReactNode>((label) => (
             <CheckableTag
               key={label.id}
-              checked={selectedTags.includes(label.name)}
-              onChange={(checked) => changeTags(label.name, checked)}
+              checked={labels.includes(label.name)}
+              onChange={(checked) => changeLabels(label.name, checked)}
             >
               {label.name}
             </CheckableTag>
           ))}
         </Flex>
       </Form.Item>
-      <Form.Item label="可见" name="visibility" required={true}>
+      <Form.Item label="可见" name="visibility">
         <Select>
           <Select.Option value="public">公开</Select.Option>
           <Select.Option value="friends">好友</Select.Option>

@@ -7,6 +7,7 @@ const myRequest: hyRequest = new hyRequest({
   withCredentials: true,
   interceptor: {
     requestInterceptor: (config) => {
+      config.url = decodeURIComponent(config.url!);
       return config;
     },
     responseInterceptorCatch: async (error) => {

@@ -1,5 +1,4 @@
-import { AsyncThunk, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { IMomentRes } from '@/network/features/moment/type';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { ILabel, ILabelnitialState } from './type';
 import { getLabelMoments, getLabels } from '@/network/features/label';
 import { IBasePageParams, IRes } from '@/network/features/interface';
