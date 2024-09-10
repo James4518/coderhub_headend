@@ -1,7 +1,6 @@
 import myRequest from '../..';
 import { IRes } from '../interface';
-import { ILabel } from './type';
-import { ILabelsName } from '@/store/modules/label/type';
+import { ILabel, ILabelsName } from './type';
 
 export async function addMomentLabel(
   id: number,

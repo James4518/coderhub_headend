@@ -7,7 +7,11 @@ if (!Object.hasOwn) {
 module.exports = {
   content: ['./public/index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {}
+    extend: {
+      colors: {
+        main: '#f2f3f5'
+      }
+    }
   },
   plugins: []
 };

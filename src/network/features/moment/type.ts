@@ -1,3 +1,5 @@
+import { ILabelsName } from "../label/type";
+
 export enum MomentVisibility {
   PUBLIC = 'public',
   FRIENDS = 'friends',
@@ -17,6 +19,7 @@ export interface IMoment {
   viewCount: number;
   likeCount: number;
   collectCount: number;
+  labels: ILabelsName;
   createAt: string;
 }
 

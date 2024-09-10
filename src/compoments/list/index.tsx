@@ -9,13 +9,16 @@ import React, {
   useState
 } from 'react';
 import type { FC, ReactNode } from 'react';
-import { Avatar, Divider, List, message, Skeleton } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { Divider, List, message, Skeleton } from 'antd';
 import { LikeOutlined, StarOutlined } from '@ant-design/icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import moment, { Moment } from 'moment';
 import IconText from '@/base-ui/IconText';
 import { BASE_URL } from '@/network/request/config';
 import { useAppDispatch, useAppSelector, useAppShallowEqual } from '@/store';
+import PopoverAvatar from '@/base-ui/popover-avatar';
+import { formatCount } from '@/utils/common';
 import useProtectedOperation from '@/hooks/useProtectedOperation';
 import reducer from './reducer';
 import { updateMomentListAction } from '@/store/modules/moment';
@@ -34,6 +37,7 @@ interface IProps {
 const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
   const pageSize = 10;
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [listHeight, setListHeight] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
@@ -169,6 +173,9 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
   const checkClick = useProtectedOperation(
     (action: IPraise, targetId: number) => handleIconClick(action, targetId)
   );
+  const labelClick = (labelName: string) => {
+    navigate;
+  };
   return (
     <MyListWrapper>
       <p>list height: {listHeight}</p>
@@ -181,6 +188,15 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
           endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
           scrollableTarget="scrollableDiv"
         >
+          {/* {
+              dataList.map(item => {
+                return (
+                  <div className="top">
+                    <a href=''><img src={getAvatarUrl(item.author.id)} alt="avatar" /></a>
+                  </div>
+                )
+              })
+            } */}
           <div ref={listRef} className="momentList">
             <List
               dataSource={dataList}
@@ -190,7 +206,7 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
                   actions={[
                     <IconText
                       icon={LikeOutlined}
-                      text={item.likeCount}
+                      text={formatCount(item.likeCount)}
                       action={IPraise.likeMoment}
                       isActive={
                         likes.includes(item.id) || state.like.includes(item.id)
@@ -201,7 +217,7 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
                     />,
                     <IconText
                       icon={StarOutlined}
-                      text={item.collectCount}
+                      text={formatCount(item.collectCount)}
                       isActive={
                         collects.includes(item.id) ||
                         state.collect.includes(item.id)
@@ -215,11 +231,28 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
                   key={item.id}
                 >
                   <List.Item.Meta
-                    avatar={<Avatar src={getAvatarUrl(item.author.id)} />}
+                    avatar={
+                      <PopoverAvatar
+                        user={{
+                          userId: item.author.id,
+                          username: item.author.username,
+                          avatarUrl: getAvatarUrl(item.author.id)
+                        }}
+                      />
+                    }
                     title={item.author.username}
                     description={formartDate(item.createAt)}
                   />
                   <p className="content">{item.content}</p>
+                  <p className="labels">
+                    {item.labels?.map((label: string) => (
+                      <a href={`/labels/${label}`} target="_blank">
+                        <span className="label" key={label}>
+                          {label}
+                        </span>
+                      </a>
+                    ))}
+                  </p>
                 </List.Item>
               )}
             />
