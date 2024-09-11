@@ -21,14 +21,16 @@ const Label: FC<IProps> = () => {
     }),
     useAppShallowEqual
   );
-  const [currentLabel, setCurrentLabel] = useState<string>(labels[0]?.name || '');
+  const [currentLabel, setCurrentLabel] = useState<string>(
+    labels[0]?.name || ''
+  );
   useEffect(() => {
     if (labels.length == 0) {
       dispatch(fetchLabelsAction({}));
     }
   }, [labels.length]);
   useEffect(() => {
-    if (labels.length > 0 && currentLabel== '') {
+    if (labels.length > 0 && currentLabel == '') {
       setCurrentLabel(labels[0].name);
       dispatch(fetchLabelMomentsAction(labels[0].name));
     }
@@ -36,16 +38,13 @@ const Label: FC<IProps> = () => {
   const changeLabel = useCallback((labelName: string) => {
     setCurrentLabel(labelName);
     dispatch(fetchLabelMomentsAction(labelName));
-  },[]);
+  }, []);
   return (
     <LabelWrapper>
       <div className="top">
         <ul>
           {labels.map((label) => (
-            <li
-              key={label.id}
-              onClick={() => changeLabel(label.name)}
-            >
+            <li key={label.id} onClick={() => changeLabel(label.name)}>
               {label.name}
             </li>
           ))}
