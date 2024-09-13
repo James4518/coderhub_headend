@@ -16,16 +16,16 @@ interface IProps {
 const PopoverAvatar: FC<IProps> = ({ user }) => {
   const { userId, username, avatarUrl } = user;
   const popoverTitle: ReactNode = (
-    <>
+    <div className="box">
       <p>
         <Link to={`/user${userId}`}>
-          <img src={avatarUrl} alt="" className='avatar' />
+          <img src={avatarUrl} alt="" className="avatar" />
         </Link>
       </p>
       <p className="username">
         <Link to={`/user${userId}`}>{username}</Link>
       </p>
-    </>
+    </div>
   );
   const popoverContent: ReactNode = (
     <button className="followbtn">

@@ -9,7 +9,7 @@ function App() {
       <AppHeader />
       <Suspense fallback="">
         <main className="bg-slate-200 pt-4">
-          <div className="w-10/12 mx-auto">{useRoutes(routes)}</div>
+          <div className="w-10/12 max-w-1200 mx-auto">{useRoutes(routes)}</div>
         </main>
       </Suspense>
     </div>

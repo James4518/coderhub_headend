@@ -7,7 +7,7 @@ interface IProps {
 }
 
 const HeaderCenter: FC<IProps> = () => {
-  return <CenterWrapper>Template</CenterWrapper>;
+  return <CenterWrapper className="hidden lg:block">Template</CenterWrapper>;
 };
 
 export default memo(HeaderCenter);

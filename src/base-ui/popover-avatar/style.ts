@@ -1,6 +1,13 @@
 import { styled } from 'styled-components';
 
 export const PopoverAvatarWrapper = styled.div`
+  .box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
   .avatar {
     width: 50px;
     height: 50px;
@@ -11,6 +18,11 @@ export const PopoverAvatarWrapper = styled.div`
     & > a {
       pointer-events: none;
     }
+  }
+  :where(.css-dev-only-do-not-override-1pg9a38).ant-popover
+    .ant-popover-inner-content {
+    display: flex;
+    justify-content: center;
   }
   .followbtn {
     width: 80px;

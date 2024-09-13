@@ -31,7 +31,7 @@ const Creator: FC<IProps> = () => {
       key: 'content',
       label: '内容管理',
       icon: <IconContent width={15} height={15} />,
-      children: [{ key: 'article', label: '文章管理' }]
+      children: [{ key: 'moment', label: '动态管理' }]
     },
     {
       key: 'data',
@@ -55,7 +55,7 @@ const Creator: FC<IProps> = () => {
   const checkClick = useProtectedOperation(publishBtnClick);
   return (
     <CreatorWrapper>
-      <div>
+      <div className="hidden lg:block creator-left">
         <Button type="primary" onClick={checkClick} className="publish">
           发表动态
         </Button>

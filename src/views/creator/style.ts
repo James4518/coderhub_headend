@@ -13,4 +13,10 @@ export const CreatorWrapper = styled.div`
     > .ant-menu-title-content {
     margin: 10px;
   }
+  .creator-left {
+    margin-right: 20px;
+    & > button {
+      width: 100%;
+    }
+  }
 `;

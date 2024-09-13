@@ -26,7 +26,7 @@ import { postMoment } from '@/network/features/moment';
 import { createMomentPictures } from '@/network/features/file';
 import { addMomentLabel } from '@/network/features/label';
 import { fetchLabelsAction } from '@/store/modules/label';
-import { ILabelsName } from '@/store/modules/label/type';
+import { ILabelsName } from '@/network/features/label/type';
 import { PublishField } from './type';
 
 interface IProps {

@@ -1,5 +1,5 @@
+import { ILabelsName } from '@/network/features/label/type';
 import { MomentVisibility } from '@/network/features/moment/type';
-import { ILabelsName } from '@/store/modules/label/type';
 
 export interface PublishField {
   content: string;
