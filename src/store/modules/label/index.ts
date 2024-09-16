@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { ILabel, ILabelnitialState } from './type';
 import { getLabelMoments, getLabels } from '@/network/features/label';
 import { IBasePageParams, IRes } from '@/network/features/interface';
 import { IThunkState } from '@/store/type';
+import { ILabelnitialState } from './type';
+import { ILabel } from '@/network/features/label/type';
 
 const initialState: ILabelnitialState = {
   labels: [],

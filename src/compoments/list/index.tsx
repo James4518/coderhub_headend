@@ -44,7 +44,7 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const { username, totalCount, likes, collects } = useAppSelector(
     (state) => ({
-      username: state.user.name,
+      username: state.user.username,
       totalCount: state.moment.totalCount,
       likes: state.praise.likes,
       collects: state.praise.collects
@@ -188,15 +188,6 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
           endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
           scrollableTarget="scrollableDiv"
         >
-          {/* {
-              dataList.map(item => {
-                return (
-                  <div className="top">
-                    <a href=''><img src={getAvatarUrl(item.author.id)} alt="avatar" /></a>
-                  </div>
-                )
-              })
-            } */}
           <div ref={listRef} className="momentList">
             <List
               dataSource={dataList}
@@ -246,10 +237,8 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
                   <p className="content">{item.content}</p>
                   <p className="labels">
                     {item.labels?.map((label: string) => (
-                      <a href={`/labels/${label}`} target="_blank">
-                        <span className="label" key={label}>
-                          {label}
-                        </span>
+                      <a href={`/labels/${label}`} target="_blank" key={label}>
+                        <span className="label">{label}</span>
                       </a>
                     ))}
                   </p>

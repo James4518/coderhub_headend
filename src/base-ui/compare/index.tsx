@@ -9,7 +9,7 @@ interface IProps {
 
 const Compare: FC<IProps> = ({ count }) => {
   return (
-    <CompareWrapper count={count}>
+    <CompareWrapper $count={count}>
       较前日
       {count !== 0 ? <span className="diff">{Math.abs(count)}</span> : '--'}
     </CompareWrapper>

@@ -49,7 +49,7 @@ const Publish: FC<IProps> = () => {
   const [result, setReSult] = useState<boolean>(false);
   const { username, labelList } = useAppSelector(
     (state) => ({
-      username: state.user.name,
+      username: state.user.username,
       labelList: state.label.labels
     }),
     useAppShallowEqual

@@ -11,7 +11,7 @@ import {
 import { useAppDispatch } from '@/store';
 import { useAuth, useUser } from '@/context';
 import { getFieldNameFromErrorMessage } from '@/utils/common';
-import { fetchUserDataAction } from '../../store/modules/user';
+import { signinAction } from '@/store/modules/user';
 import { ILoginField } from './interface';
 import { LoginWrapper } from './style';
 
@@ -19,8 +19,9 @@ interface IProps {
   children?: ReactNode;
 }
 
+const { useForm } = Form;
 const Login: FC<IProps> = () => {
-  const [form] = Form.useForm();
+  const [form] = useForm();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,15 +36,15 @@ const Login: FC<IProps> = () => {
   }) => {
     const storageType = remember ? 'local' : 'session';
     const res = await dispatch(
-      fetchUserDataAction({ username, password, storageType })
+      signinAction({ username, password, storageType })
     );
-    if (fetchUserDataAction.fulfilled.match(res)) {
+    if (signinAction.fulfilled.match(res)) {
       message.success('登录成功！');
       await updateUser(storageType, res.payload.data.userId);
       await login();
       location.pathname == '/login' ? navigate('/') : navigate(0);
     }
-    if (fetchUserDataAction.rejected.match(res)) {
+    if (signinAction.rejected.match(res)) {
       message.error('登录失败！');
       form.setFields([
         {
