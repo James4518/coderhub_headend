@@ -1,5 +1,7 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import classNames from 'classnames';
 import MyList from '@/compoments/list';
 import { useAppDispatch, useAppSelector, useAppShallowEqual } from '@/store';
 import {
@@ -14,6 +16,8 @@ interface IProps {
 
 const Label: FC<IProps> = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { labelName } = useParams();
   const { labels, labelMoments } = useAppSelector(
     (state) => ({
       labels: state.label.labels,
@@ -22,7 +26,7 @@ const Label: FC<IProps> = () => {
     useAppShallowEqual
   );
   const [currentLabel, setCurrentLabel] = useState<string>(
-    labels[0]?.name || ''
+    labelName || labels[0]?.name || ''
   );
   useEffect(() => {
     if (labels.length == 0) {
@@ -32,27 +36,32 @@ const Label: FC<IProps> = () => {
   useEffect(() => {
     if (labels.length > 0 && currentLabel == '') {
       setCurrentLabel(labels[0].name);
-      dispatch(fetchLabelMomentsAction(labels[0].name));
     }
-  }, [labels.length]);
-  const changeLabel = useCallback((labelName: string) => {
+    dispatch(fetchLabelMomentsAction(currentLabel));
+  }, [labels.length, currentLabel]);
+  const changeLabel = (labelName: string) => {
+    navigate(`/label/${labelName}`);
     setCurrentLabel(labelName);
     dispatch(fetchLabelMomentsAction(labelName));
-  }, []);
+  };
   return (
     <LabelWrapper>
-      <div className="top">
+      <nav className="top">
         <ul>
           {labels.map((label) => (
-            <li key={label.id} onClick={() => changeLabel(label.name)}>
+            <li
+              key={label.id}
+              onClick={() => changeLabel(label.name)}
+              className={classNames({ active: currentLabel === label.name })}
+            >
               {label.name}
             </li>
           ))}
         </ul>
-      </div>
+      </nav>
       <MyList
         dataList={labelMoments[currentLabel]}
-        fetchAction={() => dispatch(fetchLabelMomentsAction(currentLabel))}
+        fetchAction={() => fetchLabelMomentsAction(currentLabel)}
       />
     </LabelWrapper>
   );

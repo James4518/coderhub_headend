@@ -66,7 +66,6 @@ export const signinAction: AsyncThunk<
       dispatch(changeNameAction(username));
       return res;
     } catch (err) {
-      if (err instanceof AxiosError) err.message = err.response!.data.message;
       throw err;
     }
   }

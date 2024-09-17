@@ -51,6 +51,10 @@ const routes: RouteObject[] = [
     ]
   },
   {
+    path: '/label/:labelName',
+    element: <Label />
+  },
+  {
     path: '/label',
     element: <Label />
   },

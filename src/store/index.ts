@@ -9,6 +9,7 @@ import userReducer from './modules/user';
 import momentReducer from './modules/moment';
 import praiseReducer from './modules/praise';
 import labelReducer from './modules/label';
+import dataReducer from './modules/data';
 import { DispatchType, IRootState } from './type';
 
 const store = configureStore({
@@ -16,7 +17,8 @@ const store = configureStore({
     user: userReducer,
     moment: momentReducer,
     praise: praiseReducer,
-    label: labelReducer
+    label: labelReducer,
+    data: dataReducer
   }
 });
 

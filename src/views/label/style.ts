@@ -5,7 +5,12 @@ export const LabelWrapper = styled.div`
     ul {
       display: flex;
       li {
-        padding: 0 10px;
+        display: inline-block;
+        margin: 0 10px;
+        cursor: pointer;
+        &.active {
+          background-color: rgb(139 92 246);
+        }
       }
     }
   }

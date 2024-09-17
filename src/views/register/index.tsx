@@ -2,11 +2,11 @@ import React, { ChangeEvent, memo, useCallback, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import {
   Button,
+  Flex,
   Form,
   FormProps,
   Input,
   message,
-  Tooltip,
   Upload,
   UploadFile,
   UploadProps
@@ -18,18 +18,13 @@ import {
   UploadOutlined
 } from '@ant-design/icons';
 import ImgCrop from 'antd-img-crop';
+import { zxcvbn } from '@zxcvbn-ts/core';
 import { signup } from '@/network/features/auth';
 import { getFieldNameFromErrorMessage } from '@/utils/common';
-import {
-  LOWSTRENGTH_REGEX,
-  MEDIUMSTRENGTH_REGEX,
-  NAME_REGEX,
-  STRONGSTRENGTH_REGEX
-} from '@/constants';
+import { NAME_REGEX } from '@/constants';
 import { RcFile } from 'antd/es/upload';
 import { IRegisterFields } from './interface';
 import { RegisterWrapper } from './style';
-import { isAxiosError } from 'axios';
 
 interface IProps {
   children?: ReactNode;
@@ -38,25 +33,21 @@ interface IProps {
 const Register: FC<IProps> = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [strength, setStrength] = useState('');
+  const [strength, setStrength] = useState<number>(0);
   const [file, setFile] = useState<UploadFile | null>(null);
   const fields = useRef(['username', 'password', 'confirmPassword', 'avatar']);
   const handlePasswordChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      const password = e.target.value;
-      if (STRONGSTRENGTH_REGEX.test(password)) {
-        setStrength('Strong');
-      } else if (MEDIUMSTRENGTH_REGEX.test(password)) {
-        setStrength('Medium');
-      } else if (LOWSTRENGTH_REGEX.test(password)) {
-        setStrength('Low');
+      const passwordValue = e.target.value;
+      if (passwordValue) {
+        const score = zxcvbn(passwordValue).score;
+        setStrength(score);
       } else {
-        setStrength('');
+        setStrength(0);
       }
     },
     []
   );
-
   const onPreview = async (file: UploadFile) => {
     let src = file.url as string;
     if (!src) {
@@ -78,25 +69,24 @@ const Register: FC<IProps> = () => {
   };
 
   const onFinish = async (values: IRegisterFields) => {
-    const res = await signup({
-      username: values.username,
-      password: values.password,
-      confirmPassword: values.confirmPassword,
-      avatar: file!.originFileObj!
-    });
-    if (res.code !== 200 && isAxiosError(res)) {
+    try {
+      await signup({
+        username: values.username,
+        password: values.password,
+        confirmPassword: values.confirmPassword,
+        avatar: file!.originFileObj!
+      });
+      message.success('注册成功！');
+      navigate('/login');
+    } catch (error) {
       message.error('注册失败！');
-      const errMsg = res.response!.data.message;
-      const name = getFieldNameFromErrorMessage(fields.current, errMsg);
+      const name = getFieldNameFromErrorMessage(fields.current, error.message);
       form.setFields([
         {
           name,
-          errors: [errMsg]
+          errors: [error.message]
         }
       ]);
-    } else {
-      message.success('注册成功！');
-      navigate('/login');
     }
   };
   const onFinishFailed: FormProps<IRegisterFields>['onFinishFailed'] = ({
@@ -178,7 +168,6 @@ const Register: FC<IProps> = () => {
           />
         </Form.Item>
         <Form.Item
-          id="passwdItem"
           label="Password"
           name="password"
           rules={[
@@ -186,23 +175,20 @@ const Register: FC<IProps> = () => {
             { min: 6, message: '密码至少6个字符!' }
           ]}
         >
-          <Tooltip
-            title={strength ? `Password Strength: ${strength}` : ''}
-            placement="bottomLeft"
-            autoAdjustOverflow={false}
-            visible={!!strength}
-            trigger={['hover']}
-            getPopupContainer={() =>
-              document.querySelector('#passwdItem') || document.body
-            }          
-          >
+          <Flex vertical>
             <Input.Password
               iconRender={(visible) =>
                 visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
               }
               onChange={handlePasswordChange}
             />
-          </Tooltip>
+            <div className="strength-meter-bar">
+              <div
+                className="strength-meter-bar--fill"
+                data-score={strength}
+              ></div>
+            </div>
+          </Flex>
         </Form.Item>
         <Form.Item
           label="Confirm Password"

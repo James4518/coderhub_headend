@@ -1,16 +1,16 @@
-import { Button, Menu, MenuProps } from 'antd';
 import React, { memo } from 'react';
 import type { FC, ReactNode } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { Button, Menu, MenuProps } from 'antd';
 import {
   FundProjectionScreenOutlined,
   HomeOutlined,
   QuestionCircleOutlined
 } from '@ant-design/icons';
+import withAuth from '@/base-ui/witAuth';
 import IconContent from '@/assets/icons/content';
 import useProtectedOperation from '@/hooks/useProtectedOperation';
 import { CreatorWrapper } from './style';
-import withAuth from '@/base-ui/witAuth';
 
 interface IProps {
   children?: ReactNode;
@@ -31,26 +31,26 @@ const Creator: FC<IProps> = () => {
       key: 'content',
       label: '内容管理',
       icon: <IconContent width={15} height={15} />,
-      children: [{ key: 'moment', label: '动态管理' }]
+      children: [{ key: 'content/moment', label: '动态管理' }]
     },
     {
       key: 'data',
       label: '数据中心',
       icon: <FundProjectionScreenOutlined />,
       children: [
-        { key: 'content-data', label: '内容数据' },
-        { key: 'fans-data', label: '粉丝数据' }
+        { key: 'data/content', label: '内容数据' },
+        { key: 'data/fans', label: '粉丝数据' }
       ]
     },
     {
       key: 'help',
       label: '帮助中心',
       icon: <QuestionCircleOutlined />,
-      children: [{ key: 'questions', label: '常见问题' }]
+      children: [{ key: 'help/questions', label: '常见问题' }]
     }
   ];
   const onClick: MenuProps['onClick'] = (e) => {
-    console.log('click ', e);
+    navigate(e.key);
   };
   const checkClick = useProtectedOperation(publishBtnClick);
   return (

@@ -9,6 +9,6 @@ export interface IUser {
   avatarUrl: string;
   point: number;
   level: ILevel;
-  createAt: Date | null;
-  updateAt: Date | null;
+  createAt: string | null;
+  updateAt: string | null;
 }

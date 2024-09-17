@@ -89,13 +89,13 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
       }
     };
   }, [dataList]);
-  const getAvatarUrl = useCallback((id: number) => {
+  const getAvatarUrl = (id: number) => {
     return `${BASE_URL}/user/avatar/${id}`;
-  }, []);
-  const formartDate = useCallback((dateStr: string) => {
+  };
+  const formartDate = (dateStr: string) => {
     const date: Moment = moment(dateStr);
     return date.format('YYYY-MM-DD HH:mm:ss');
-  }, []);
+  };
   const handleLike = async (item: number, success: boolean) => {
     updateState({
       type: success ? 'ADD_LIKE' : 'DEL_LIKE',
@@ -174,7 +174,7 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
     (action: IPraise, targetId: number) => handleIconClick(action, targetId)
   );
   const labelClick = (labelName: string) => {
-    navigate;
+    navigate(`/label/${labelName}`);
   };
   return (
     <MyListWrapper>
@@ -237,7 +237,7 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
                   <p className="content">{item.content}</p>
                   <p className="labels">
                     {item.labels?.map((label: string) => (
-                      <a href={`/labels/${label}`} target="_blank" key={label}>
+                      <a href={`#/label/${label}`} target="_blank" key={label}>
                         <span className="label">{label}</span>
                       </a>
                     ))}
