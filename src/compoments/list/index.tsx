@@ -9,7 +9,6 @@ import React, {
   useState
 } from 'react';
 import type { FC, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Divider, List, message, Skeleton } from 'antd';
 import { LikeOutlined, StarOutlined } from '@ant-design/icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -31,21 +30,26 @@ import { MyListWrapper } from './style';
 interface IProps {
   children?: ReactNode;
   dataList: IMoment[];
+  totalCount: number;
+  hasFetched?: boolean;
   fetchAction: ({}) => any;
 }
 
-const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
+const MyList: FC<IProps> = ({
+  dataList,
+  totalCount,
+  hasFetched,
+  fetchAction
+}) => {
   const pageSize = 10;
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const [listHeight, setListHeight] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const listRef = useRef<HTMLDivElement>(null);
-  const { username, totalCount, likes, collects } = useAppSelector(
+  const { username, likes, collects } = useAppSelector(
     (state) => ({
       username: state.user.username,
-      totalCount: state.moment.totalCount,
       likes: state.praise.likes,
       collects: state.praise.collects
     }),
@@ -71,7 +75,12 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
     setLoading(false);
   }, [currentPage]);
   useEffect(() => {
-    loadMoreData();
+    !hasFetched && loadMoreData();
+    if (!hasFetched) {
+      loadMoreData();
+    } else {
+      setCurrentPage(1);
+    }
   }, []);
   useLayoutEffect(() => {
     const handleResize = () => {
@@ -173,9 +182,6 @@ const MyList: FC<IProps> = ({ dataList, fetchAction }) => {
   const checkClick = useProtectedOperation(
     (action: IPraise, targetId: number) => handleIconClick(action, targetId)
   );
-  const labelClick = (labelName: string) => {
-    navigate(`/label/${labelName}`);
-  };
   return (
     <MyListWrapper>
       <p>list height: {listHeight}</p>

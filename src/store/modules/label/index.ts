@@ -4,6 +4,7 @@ import { IBasePageParams, IRes } from '@/network/features/interface';
 import { IThunkState } from '@/store/type';
 import { ILabelnitialState } from './type';
 import { ILabel } from '@/network/features/label/type';
+import { IMomentListRes } from '@/network/features/moment/type';
 
 const initialState: ILabelnitialState = {
   labels: [],
@@ -18,14 +19,15 @@ export const LabelSlice = createSlice({
     },
     changeLabelMomentsAction(state, { payload }) {
       const { labelId, moments } = payload;
-      if (state.labelMoments[labelId]) {
-        state.labelMoments[labelId] = [
-          ...state.labelMoments[labelId],
-          ...moments
-        ];
-      } else {
-        state.labelMoments[labelId] = moments;
+      const { moments: newMoments, totalCount } = moments;
+      if (!state.labelMoments[labelId]) {
+        state.labelMoments[labelId] = { moments: [], totalCount: 0 };
       }
+      state.labelMoments[labelId].moments = [
+        ...state.labelMoments[labelId].moments,
+        ...newMoments
+      ];
+      state.labelMoments[labelId].totalCount = totalCount;
     }
   }
 });
@@ -40,7 +42,7 @@ export const fetchLabelsAction = createAsyncThunk<
   return res;
 });
 export const fetchLabelMomentsAction = createAsyncThunk<
-  IRes<ILabel[]>,
+  IRes<IMomentListRes>,
   string,
   IThunkState
 >('label/labelMoments', async (labelName, { getState, dispatch }) => {

@@ -1,5 +1,4 @@
-import React, { memo, useState } from 'react';
-import type { FC, ReactNode } from 'react';
+import React, { memo, FC, ReactNode } from 'react';
 import MyList from '@/compoments/list';
 import { useAppSelector, useAppShallowEqual } from '@/store';
 import { fetchMomentListAction } from '@/store/modules/moment';
@@ -10,15 +9,17 @@ interface IProps {
 }
 
 const Home: FC<IProps> = () => {
-  const { momentList } = useAppSelector(
-    (state) => ({
-      momentList: state.moment.momentList
-    }),
+  const { momentList, totalCount } = useAppSelector(
+    (state) => state.moment,
     useAppShallowEqual
   );
   return (
     <HomeWrapper>
-      <MyList dataList={momentList} fetchAction={fetchMomentListAction} />
+      <MyList
+        dataList={momentList}
+        totalCount={totalCount}
+        fetchAction={fetchMomentListAction}
+      />
     </HomeWrapper>
   );
 };

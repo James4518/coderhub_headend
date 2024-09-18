@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
@@ -8,6 +8,7 @@ import {
   fetchLabelMomentsAction,
   fetchLabelsAction
 } from '@/store/modules/label';
+import { ILabel } from '@/network/features/label/type';
 import { LabelWrapper } from './style';
 
 interface IProps {
@@ -18,31 +19,40 @@ const Label: FC<IProps> = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { labelName } = useParams();
+  const [currentLabel, setCurrentLabel] = useState<ILabel | null>(null);
+  const previousLabelRef = useRef<ILabel | null>(null);
+  const fetchedLabelsRef = useRef<Set<string>>(new Set());
   const { labels, labelMoments } = useAppSelector(
-    (state) => ({
-      labels: state.label.labels,
-      labelMoments: state.label.labelMoments
-    }),
+    (state) => state.label,
     useAppShallowEqual
   );
-  const [currentLabel, setCurrentLabel] = useState<string>(
-    labelName || labels[0]?.name || ''
-  );
   useEffect(() => {
-    if (labels.length == 0) {
+    if (labels.length === 0) {
       dispatch(fetchLabelsAction({}));
     }
   }, [labels.length]);
   useEffect(() => {
-    if (labels.length > 0 && currentLabel == '') {
-      setCurrentLabel(labels[0].name);
+    if (labels.length > 0) {
+      const selectedLabel = labelName
+        ? labels.find((label) => label.name === labelName)
+        : labels[0];
+      setCurrentLabel(selectedLabel || labels[0]);
+      if (!labelName || !selectedLabel) {
+        navigate(`/label/${labels[0].name}`, { replace: true });
+      }
     }
-    dispatch(fetchLabelMomentsAction(currentLabel));
-  }, [labels.length, currentLabel]);
+  }, [labels, labelName]);
+  useEffect(() => {
+    if (currentLabel && previousLabelRef.current !== currentLabel) {
+      if (!fetchedLabelsRef.current.has(currentLabel.name)) {
+        dispatch(fetchLabelMomentsAction(currentLabel.name));
+        fetchedLabelsRef.current.add(currentLabel.name);
+      }
+      previousLabelRef.current = currentLabel;
+    }
+  }, [currentLabel]);
   const changeLabel = (labelName: string) => {
     navigate(`/label/${labelName}`);
-    setCurrentLabel(labelName);
-    dispatch(fetchLabelMomentsAction(labelName));
   };
   return (
     <LabelWrapper>
@@ -52,17 +62,28 @@ const Label: FC<IProps> = () => {
             <li
               key={label.id}
               onClick={() => changeLabel(label.name)}
-              className={classNames({ active: currentLabel === label.name })}
+              className={classNames({
+                active: currentLabel?.name === label.name
+              })}
             >
               {label.name}
             </li>
           ))}
         </ul>
       </nav>
-      <MyList
-        dataList={labelMoments[currentLabel]}
-        fetchAction={() => fetchLabelMomentsAction(currentLabel)}
-      />
+      {Object.entries(labelMoments)
+        .filter(
+          ([labelId, moments]) => labelId === currentLabel?.id?.toString()
+        )
+        .map(([labelId, moments]) => (
+          <MyList
+            key={labelId}
+            dataList={moments.moments}
+            totalCount={moments.totalCount}
+            hasFetched={true}
+            fetchAction={() => fetchLabelMomentsAction(currentLabel!.name)}
+          />
+        ))}
     </LabelWrapper>
   );
 };
