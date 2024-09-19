@@ -5,6 +5,9 @@ import { useAppDispatch, useAppSelector, useAppShallowEqual } from '@/store';
 import { fetchUserDataAction } from '@/store/modules/user';
 import { fetchPraiseAction } from '@/store/modules/praise';
 import { diffDays } from '@/utils/date';
+import Overview from './cpns/overview';
+import Recent from './cpns/recent';
+import Userinfo from './cpns/userinfo';
 import { CreatorHomeWrapper } from './style';
 
 interface IProps {
@@ -40,6 +43,18 @@ const CreatorHome: FC<IProps> = () => {
   }, [createAt]);
   return (
     <CreatorHomeWrapper>
+      <Userinfo
+        user={{
+          userId: userId!,
+          username,
+          avatarUrl,
+          followerCount: followerCount.length,
+          followeeCount: followeeCount.length,
+          days: diff
+        }}
+      />
+      <Overview />
+      <Recent />
     </CreatorHomeWrapper>
   );
 };
