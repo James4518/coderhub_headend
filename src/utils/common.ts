@@ -17,3 +17,17 @@ export function formatCount(count: number): string {
     return count.toString();
   }
 }
+export function groupValuesByKey<T extends Record<string, number>>(
+  data: (T | null)[]
+) {
+  const keys = Object.keys(
+    data.find((item) => item !== null) ?? {}
+  ) as (keyof T)[];
+  return keys.reduce(
+    (acc, key) => {
+      acc[key] = data.map((obj) => (obj ? obj[key] : 0));
+      return acc;
+    },
+    {} as { [K in keyof T]: number[] }
+  );
+}

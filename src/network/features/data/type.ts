@@ -7,6 +7,7 @@ export interface IDailyRes {
   commentCount: number;
   collectCount: number;
   publishCount: number;
+  [key: string]: number;
 }
 export interface IDailyOverviewRes extends IDailyRes {
   preFansCount: number;
