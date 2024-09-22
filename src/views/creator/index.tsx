@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import type { FC, ReactNode } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { Button, Menu, MenuProps } from 'antd';
 import {
   FundProjectionScreenOutlined,
@@ -17,6 +17,12 @@ interface IProps {
 }
 type MenuItem = Required<MenuProps>['items'][number];
 const Creator: FC<IProps> = () => {
+  const location = useLocation();
+  const match = useMatch('/creator/*');
+  const currentPath = location.pathname;
+  const relativePath = match
+    ? currentPath.replace(match.pathnameBase + '/', '')
+    : '';
   const navigate = useNavigate();
   const publishBtnClick = () => {
     navigate('/creator/publish');
@@ -60,9 +66,11 @@ const Creator: FC<IProps> = () => {
           发表动态
         </Button>
         <Menu
+          className="memu"
           onClick={onClick}
-          style={{ width: 256 }}
-          defaultSelectedKeys={['home']}
+          style={{ maxWidth: 200 }}
+          defaultSelectedKeys={[relativePath] || ['home']}
+          defaultOpenKeys={['home', 'content', 'data', 'help']}
           mode="inline"
           items={items}
         />

@@ -31,7 +31,8 @@ const initialState: IinitialState = {
     series: {
       fansCount: [],
       newFansCount: [],
-      unfollow: [],
+      unfollowCount: [],
+      netfollowCount: [],
       viewCount: [],
       likeCount: [],
       commentCount: [],
@@ -44,7 +45,8 @@ const initialState: IinitialState = {
     series: {
       fansCount: [],
       newFansCount: [],
-      unfollow: [],
+      unfollowCount: [],
+      netfollowCount: [],
       viewCount: [],
       likeCount: [],
       commentCount: [],
@@ -57,7 +59,8 @@ const initialState: IinitialState = {
     series: {
       fansCount: [],
       newFansCount: [],
-      unfollow: [],
+      unfollowCount: [],
+      netfollowCount: [],
       viewCount: [],
       likeCount: [],
       commentCount: [],
@@ -112,7 +115,8 @@ export const DataSlice = createSlice({
         dates,
         fansCount,
         newFansCount,
-        unfollow,
+        unfollowCount,
+        netfollowCount,
         viewCount,
         likeCount,
         commentCount,
@@ -123,7 +127,8 @@ export const DataSlice = createSlice({
         state[days].dates = dates;
         state[days].series.fansCount = fansCount;
         state[days].series.newFansCount = newFansCount;
-        state[days].series.unfollow = unfollow;
+        state[days].series.unfollowCount = unfollowCount;
+        state[days].series.netfollowCount = netfollowCount;
         state[days].series.viewCount = viewCount;
         state[days].series.likeCount = likeCount;
         state[days].series.commentCount = commentCount;

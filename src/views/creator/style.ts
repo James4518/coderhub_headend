@@ -3,7 +3,11 @@ import styled from 'styled-components';
 export const CreatorWrapper = styled.div`
   display: flex;
   .publish: {
-    width: 256px;
+    width: 200px;
+  }
+  .memu {
+    max-height: 320px;
+    overflow-y: auto;
   }
   :where(.css-dev-only-do-not-override-1pg9a38).ant-menu-inline.ant-menu-root
     .ant-menu-item
@@ -14,7 +18,7 @@ export const CreatorWrapper = styled.div`
     margin: 10px;
   }
   .creator-left {
-    margin-right: 20px;
+    margin-right: 10px;
     & > button {
       width: 100%;
     }

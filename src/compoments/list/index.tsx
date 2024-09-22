@@ -38,7 +38,7 @@ interface IProps {
 const MyList: FC<IProps> = ({
   dataList,
   totalCount,
-  hasFetched,
+  hasFetched = false,
   fetchAction
 }) => {
   const pageSize = 10;
@@ -75,7 +75,6 @@ const MyList: FC<IProps> = ({
     setLoading(false);
   }, [currentPage]);
   useEffect(() => {
-    !hasFetched && loadMoreData();
     if (!hasFetched) {
       loadMoreData();
     } else {

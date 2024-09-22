@@ -1,7 +1,8 @@
 export interface IDailyRes {
   fansCount: number;
   newFansCount: number;
-  unfollow: number;
+  unfollowCount: number;
+  netfollowCount: number;
   viewCount: number;
   likeCount: number;
   commentCount: number;

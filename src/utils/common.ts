@@ -19,7 +19,7 @@ export function formatCount(count: number): string {
 }
 export function groupValuesByKey<T extends Record<string, number>>(
   data: (T | null)[]
-) {
+): { [K in keyof T]: number[] } {
   const keys = Object.keys(
     data.find((item) => item !== null) ?? {}
   ) as (keyof T)[];

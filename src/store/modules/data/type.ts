@@ -2,7 +2,8 @@ export type IDays = '7days' | '14days' | '30days';
 export interface IStatistics {
   fansCount: number[];
   newFansCount: number[];
-  unfollow: number[];
+  unfollowCount: number[];
+  netfollowCount: number[];
   viewCount: number[];
   likeCount: number[];
   commentCount: number[];
