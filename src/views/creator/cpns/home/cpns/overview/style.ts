@@ -4,12 +4,10 @@ export const OverviewWrapper = styled.div`
   margin-top: 20px;
   .icon {
     margin-left: 5px;
-    font-size: 14px;
     cursor: pointer;
   }
   #overview-title .title {
-    line-height: 24px;
-    font-size: 24px;
+    font-size: 18px;
   }
   .item-content .title {
     font-size: 18px;

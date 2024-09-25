@@ -159,7 +159,7 @@ export const fetchDaysAction = createAsyncThunk<
   const day = parseInt(days.match(/\d+/)?.[0] ?? '7');
   const res: IRes<IDailyRes[]> = await getDataInfo(day);
   const data = groupValuesByKey<IDailyRes>(res.data);
-  const date = getYesterdayAndAgo(day);
+  const date = getYesterdayAndAgo(day - 1);
   const dates = getDatesBetween(date.target.date, date.yesterday.date);
   dispatch(changeDaysAction({ days, dates, ...data }));
   return res;

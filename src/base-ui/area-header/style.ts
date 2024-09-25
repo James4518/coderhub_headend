@@ -12,11 +12,11 @@ export const AreaHeaderWrapper = styled.h2`
     justify-content: center;
   }
   a {
-    align-items: center;
-    font-size: 14px;
+    font-size: 12px;
     color: #86909c;
     &::after {
       content: '\\003E';
+      margin-left: 3px;
     }
   }
 `;

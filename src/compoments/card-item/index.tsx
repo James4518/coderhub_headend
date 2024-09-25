@@ -13,7 +13,7 @@ const CardItem: FC<IProps> = ({ item }) => {
   const { title, currentCount, previousCount } = item;
   return (
     <CardItemWrapper>
-      <div className="bg-main item-content">
+      <div className="item-content">
         <h2 className="title">{title}</h2>
         <strong className="current">{currentCount}</strong>
         <Compare count={currentCount - previousCount} />

@@ -4,6 +4,7 @@ export const CardItemWrapper = styled.div`
   .item-content {
     margin: 0 auto;
     padding: 16px 20px;
+    background-color: ${(props) => props.theme.color.primary};
     .title {
       color: #4e5969;
       line-height: 22px;
