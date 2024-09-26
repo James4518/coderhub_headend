@@ -8,6 +8,6 @@ declare module 'styled-components' {
     };
     mixin: {
       textNowrap: string;
-    }
+    };
   }
 }

@@ -13,6 +13,9 @@ export const TrendWrapper = styled.section`
           color: #1d7dfa;
           background-color: #fff;
         }
+        &:hover {
+          background: #fafafa;
+        }
       }
     }
     .right {
@@ -22,9 +25,5 @@ export const TrendWrapper = styled.section`
       cursor: pointer;
       text-decoration: none;
     }
-  }
-  .chart-content {
-    width: 100%;
-    height: 430px;
   }
 `;

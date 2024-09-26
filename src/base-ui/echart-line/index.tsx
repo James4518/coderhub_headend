@@ -1,19 +1,21 @@
 import React, {
   forwardRef,
   memo,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
   useState
 } from 'react';
-import { ECharts, EChartsOption, init } from 'echarts';
+import { EChartsOption, init } from 'echarts';
 import * as XLSX from 'xlsx';
 import { EchartLineRef, IProps } from './type';
 
 const EchartLine = forwardRef<EchartLineRef, IProps>(
-  ({ dates, series, isGraphic, echartEle, onSelect }, ref) => {
-    const instanceRef = useRef<ECharts | null>(null);
+  ({ dates, series, isGraphic, onSelect }, ref) => {
+    const chartRef = useRef<HTMLDivElement>(null);
+    const echartInstance = useRef<echarts.ECharts | null>(null);
     const [selectedSeries, setSelectedSeries] = useState<string[]>([
       Object.keys(series)[0]
     ]);
@@ -90,18 +92,17 @@ const EchartLine = forwardRef<EchartLineRef, IProps>(
         series: Object.keys(series).map((key) => ({
           name: key,
           type: 'line',
-          stack: '总量',
           data: series[key],
           smooth: true,
           animationDuration: 2000
         })),
         graphic: graphicOption
       };
-    }, [dates, series, selectedSeries, graphicOption]);
+    }, [dates, series, isGraphic, selectedSeries, graphicOption]);
     useEffect(() => {
-      if (echartEle && !instanceRef.current) {
-        const chartInstance = init(echartEle);
-        instanceRef.current = chartInstance;
+      if (!echartInstance.current && chartRef.current) {
+        const chartInstance = init(chartRef.current);
+        echartInstance.current = chartInstance;
         chartInstance.setOption(option, true);
         const handleLegendSelectChanged = (params: {
           type: 'legendselectchanged';
@@ -114,54 +115,63 @@ const EchartLine = forwardRef<EchartLineRef, IProps>(
           setSelectedSeries(selected);
           onSelect && onSelect(selected);
         };
+        const handleResize = () => {
+          echartInstance.current?.resize();
+        };
+        window.addEventListener('resize', handleResize);
         chartInstance.on('legendselectchanged', handleLegendSelectChanged);
         return () => {
+          window.removeEventListener('resize', handleResize);
           chartInstance.off('legendselectchanged', handleLegendSelectChanged);
           chartInstance.dispose();
+          echartInstance.current = null;
         };
       }
-    }, [echartEle]);
+    }, [chartRef]);
     useEffect(() => {
-      if (instanceRef.current) {
-        instanceRef.current.setOption(option, true);
+      if (echartInstance.current) {
+        echartInstance.current.setOption(option, true);
       }
     }, [option]);
-    const convertDataToExcel = (filename: string) => {
-      if (!dates.length || !Object.keys(series).length) {
-        return;
-      }
-      const header = ['Date', ...Object.keys(series)];
-      const data = dates.map((date, index) => [
-        date,
-        ...Object.keys(series).map((key) => series[key][index] ?? null)
-      ]);
-      const worksheet = XLSX.utils.aoa_to_sheet([header, ...data]);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Chart Data');
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: 'xlsx',
-        type: 'array'
-      });
-      const blob = new Blob([excelBuffer], {
-        type: 'application/octet-stream'
-      });
-      const a = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      a.href = url;
-      a.download = `${filename}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    };
-    useImperativeHandle(ref, () => ({
-      setDownloadName: (filename: string) => {
-        if (instanceRef.current) {
+    const convertDataToExcel = useCallback(
+      (filename: string) => {
+        if (!dates.length || !Object.keys(series).length) return;
+        const header = ['Date', ...Object.keys(series)];
+        const data = dates.map((date, index) => [
+          date,
+          ...Object.keys(series).map((key) => series[key][index] ?? null)
+        ]);
+        const worksheet = XLSX.utils.aoa_to_sheet([header, ...data]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Chart Data');
+        const excelBuffer = XLSX.write(workbook, {
+          bookType: 'xlsx',
+          type: 'array'
+        });
+        const blob = new Blob([excelBuffer], {
+          type: 'application/octet-stream'
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+      [dates, series]
+    );
+    useImperativeHandle(
+      ref,
+      () => ({
+        setDownloadName: (filename: string) => {
           convertDataToExcel(filename);
         }
-      }
-    }));
-    return null;
+      }),
+      [convertDataToExcel]
+    );
+    return <div ref={chartRef} style={{ width: '100%', height: '400px' }} />;
   }
 );
 

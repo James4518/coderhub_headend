@@ -10,6 +10,7 @@ import momentReducer from './modules/moment';
 import praiseReducer from './modules/praise';
 import labelReducer from './modules/label';
 import dataReducer from './modules/data';
+import { checkDataMiddleware } from './middlewares';
 import { DispatchType, IRootState } from './type';
 
 const store = configureStore({
@@ -19,7 +20,14 @@ const store = configureStore({
     praise: praiseReducer,
     label: labelReducer,
     data: dataReducer
-  }
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(
+      checkDataMiddleware([
+        { type: 'data/days/fulfilled', stateKey: 'data' },
+        { type: 'data/overview/fulfilled', stateKey: 'data' }
+      ])
+    )
 });
 
 export const useAppSelector: TypedUseSelectorHook<IRootState> = useSelector;

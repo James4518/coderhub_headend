@@ -71,19 +71,15 @@ const Label: FC<IProps> = () => {
           ))}
         </ul>
       </nav>
-      {Object.entries(labelMoments)
-        .filter(
-          ([labelId, moments]) => labelId === currentLabel?.id?.toString()
-        )
-        .map(([labelId, moments]) => (
-          <MyList
-            key={labelId}
-            dataList={moments.moments}
-            totalCount={moments.totalCount}
-            hasFetched={true}
-            fetchAction={() => fetchLabelMomentsAction(currentLabel!.name)}
-          />
-        ))}
+      {currentLabel && (
+        <MyList
+          key={currentLabel.id}
+          dataList={labelMoments[currentLabel.id!]?.moments}
+          totalCount={labelMoments[currentLabel.id!]?.totalCount}
+          hasFetched={true}
+          fetchAction={() => fetchLabelMomentsAction(currentLabel.name)}
+        />
+      )}
     </LabelWrapper>
   );
 };

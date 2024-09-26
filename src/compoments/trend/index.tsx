@@ -1,4 +1,11 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import type { FC, ReactNode } from 'react';
 import classNames from 'classnames';
 import { DownloadOutlined } from '@ant-design/icons';
@@ -54,7 +61,7 @@ const Trend: FC<IProps> = ({
         <div className="left">
           {buttons.map((button) => (
             <button
-              className={classNames({ active: currentDays === button.value })}
+              className={currentDays === button.value ? 'active' : ''}
               onClick={() => updatedDays(button.value)}
               key={button.text}
             >
