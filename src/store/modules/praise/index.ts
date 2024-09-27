@@ -8,9 +8,9 @@ import {
   createSlice,
   PayloadAction
 } from '@reduxjs/toolkit';
-import { IInitialState } from './type';
+import { IPraiseInitialState } from './type';
 
-const initialState: IInitialState = {
+const initialState: IPraiseInitialState = {
   followers: [],
   followees: [],
   likes: [],

@@ -2,17 +2,16 @@ import { AsyncThunk, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { signin } from '@/network/features/auth';
 import { IThunkState } from '@/store/type';
 import storageHelper from '@/utils/cache';
+import { getUserInfo } from '@/network/features/user';
+import { getUserMoments } from '@/network/features/moment';
 import { ILoginDetail } from '@/views/login/interface';
 import { IMomentListRes } from '@/network/features/moment/type';
 import { IPageParamsWithId, IRes } from '@/network/features/interface';
 import { ILoginRes } from '@/network/features/auth/type';
-import { AxiosError } from 'axios';
-import { getUserMoments } from '@/network/features/moment';
-import { IInitialState } from './type';
 import { ILevel, IUser } from '@/network/features/user/type';
-import { getUserInfo } from '@/network/features/user';
+import { IUserInitialState } from './type';
 
-const initialState: IInitialState = {
+const initialState: IUserInitialState = {
   username:
     storageHelper.getItem('USERNAME', 'local') ||
     storageHelper.getItem('USERNAME', 'session') ||

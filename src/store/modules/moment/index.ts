@@ -1,15 +1,17 @@
 import { AsyncThunk, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { IMoment, IMomentListRes } from '@/network/features/moment/type';
+import { IMomentListRes } from '@/network/features/moment/type';
 import { getMomentList } from '@/network/features/moment';
 import { IBasePageParams, IRes } from '@/network/features/interface';
 import { IThunkState } from '@/store/type';
+import { IMomentInitialState } from './type';
 
+const initialState: IMomentInitialState = {
+  totalCount: 0,
+  momentList: []
+};
 export const MomentSlice = createSlice({
   name: 'moment',
-  initialState: {
-    totalCount: 0,
-    momentList: [] as IMoment[]
-  },
+  initialState,
   reducers: {
     changeTotalCountAction(state, { payload }) {
       state.totalCount = payload;

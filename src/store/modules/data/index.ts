@@ -4,10 +4,10 @@ import { IThunkState } from '@/store/type';
 import { getDataInfo, overview } from '@/network/features/data';
 import { IDailyOverviewRes, IDailyRes } from '@/network/features/data/type';
 import { groupValuesByKey } from '@/utils/common';
-import { IDays, IDaysData, IinitialState } from './type';
+import { IDays, IDaysData, IDataInitialState } from './type';
 import { getDatesBetween, getYesterdayAndAgo } from '@/utils/date';
 
-const initialState: IinitialState = {
+const initialState: IDataInitialState = {
   fansCount: 0,
   preFansCount: 0,
   newFansCount: 0,

@@ -1,4 +1,4 @@
-export interface IInitialState {
+export interface IPraiseInitialState {
   followers: number[];
   followees: number[];
   likes: number[];

@@ -18,7 +18,7 @@ export interface IDaysStore {
   series: IStatistics;
   dates: string[];
 }
-export interface IinitialState {
+export interface IDataInitialState {
   fansCount: number;
   preFansCount: number;
   newFansCount: number;

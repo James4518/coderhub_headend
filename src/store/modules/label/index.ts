@@ -2,11 +2,11 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getLabelMoments, getLabels } from '@/network/features/label';
 import { IBasePageParams, IRes } from '@/network/features/interface';
 import { IThunkState } from '@/store/type';
-import { ILabelnitialState } from './type';
+import { ILabelInitialState } from './type';
 import { ILabel } from '@/network/features/label/type';
 import { IMomentListRes } from '@/network/features/moment/type';
 
-const initialState: ILabelnitialState = {
+const initialState: ILabelInitialState = {
   labels: [],
   labelMoments: {}
 };
