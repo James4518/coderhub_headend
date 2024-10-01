@@ -16,7 +16,9 @@ const DataFans: FC<IProps> = () => {
     </>,
     '粉丝列表'
   ];
-  return <AreaHeaderV2 titles={['粉丝数据', '粉丝列表']} components={components} />;
+  return (
+    <AreaHeaderV2 titles={['粉丝数据', '粉丝列表']} components={components} />
+  );
 };
 
 export default memo(DataFans);
