@@ -10,6 +10,7 @@ import momentReducer from './modules/moment';
 import praiseReducer from './modules/praise';
 import labelReducer from './modules/label';
 import dataReducer from './modules/data';
+import reviewReducer from './modules/review';
 import { checkDataMiddleware } from './middlewares';
 import { DispatchType, IRootState } from './type';
 
@@ -19,7 +20,8 @@ const store = configureStore({
     moment: momentReducer,
     praise: praiseReducer,
     label: labelReducer,
-    data: dataReducer
+    data: dataReducer,
+    review: reviewReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(

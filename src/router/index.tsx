@@ -8,6 +8,7 @@ const Personal = lazy(() => import('@/views/personal'));
 const NotFound = lazy(() => import('@/views/notFound'));
 const Creator = lazy(() => import('@/views/creator'));
 const CreatorHome = lazy(() => import('@/views/creator/cpns/home'));
+const ContentMoment = lazy(() => import('@/views/creator/cpns/content/moment'));
 const CreatorFansData = lazy(() => import('@/views/creator/cpns/data/fans'));
 const CreatorContentData = lazy(
   () => import('@/views/creator/cpns/data/content')
@@ -54,6 +55,10 @@ const routes: RouteObject[] = [
         element: <Publish />
       },
       {
+        path: '/creator/content/moment',
+        element: <ContentMoment />
+      },
+      {
         path: '/creator/data/fans',
         element: <CreatorFansData />
       },
@@ -69,10 +74,6 @@ const routes: RouteObject[] = [
   },
   {
     path: '/label/:labelName',
-    element: <Label />
-  },
-  {
-    path: '/label',
     element: <Label />
   },
   {

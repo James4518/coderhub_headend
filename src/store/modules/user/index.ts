@@ -81,7 +81,7 @@ export const fetchUserDataAction: AsyncThunk<
     return res;
   }
 );
-export const fetchUserMoment: AsyncThunk<
+export const fetchUserMomentAction: AsyncThunk<
   IRes<IMomentListRes>,
   IPageParamsWithId,
   IThunkState

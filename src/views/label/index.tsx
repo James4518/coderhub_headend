@@ -27,33 +27,28 @@ const Label: FC<IProps> = () => {
     useAppShallowEqual
   );
   useEffect(() => {
-    if (labels.length === 0) {
-      dispatch(fetchLabelsAction({}));
-    }
-  }, [labels.length]);
+    labels.length === 0 && dispatch(fetchLabelsAction({}));
+  }, []);
   useEffect(() => {
     if (labels.length > 0) {
       const selectedLabel = labelName
         ? labels.find((label) => label.name === labelName)
         : labels[0];
       setCurrentLabel(selectedLabel || labels[0]);
-      if (!labelName || !selectedLabel) {
-        navigate(`/label/${labels[0].name}`, { replace: true });
-      }
     }
-  }, [labels, labelName]);
+  }, [labels.length, labelName]);
   useEffect(() => {
-    if (currentLabel && previousLabelRef.current !== currentLabel) {
-      if (!fetchedLabelsRef.current.has(currentLabel.name)) {
-        dispatch(fetchLabelMomentsAction(currentLabel.name));
-        fetchedLabelsRef.current.add(currentLabel.name);
+    if (currentLabel) {
+      navigate(`/label/${currentLabel.name}`, { replace: true });
+      if (previousLabelRef.current !== currentLabel) {
+        if (!fetchedLabelsRef.current.has(currentLabel.name)) {
+          dispatch(fetchLabelMomentsAction(currentLabel.name));
+          fetchedLabelsRef.current.add(currentLabel.name);
+        }
+        previousLabelRef.current = currentLabel;
       }
-      previousLabelRef.current = currentLabel;
     }
   }, [currentLabel]);
-  const changeLabel = (labelName: string) => {
-    navigate(`/label/${labelName}`);
-  };
   return (
     <LabelWrapper>
       <nav className="top">
@@ -61,7 +56,7 @@ const Label: FC<IProps> = () => {
           {labels.map((label) => (
             <li
               key={label.id}
-              onClick={() => changeLabel(label.name)}
+              onClick={() => navigate(`/label/${label.name}`)}
               className={classNames({
                 active: currentLabel?.name === label.name
               })}
