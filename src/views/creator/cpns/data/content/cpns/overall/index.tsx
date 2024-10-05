@@ -10,7 +10,7 @@ interface IProps {
   children?: ReactNode;
 }
 
-const DataConentTrendPic: FC<IProps> = () => {
+const ContentOverall: FC<IProps> = () => {
   const dispatch = useAppDispatch();
   const [currentDays, setCurrentDays] = useState<IDays>('7days');
   const data = useAppSelector((state) => state.data, useAppShallowEqual);
@@ -39,7 +39,6 @@ const DataConentTrendPic: FC<IProps> = () => {
     },
     [formartCurrentData]
   );
-  console.log(hasResult);
   useEffect(() => {
     !hasResult && dispatch(fetchDaysAction(currentDays));
   }, [currentDays]);
@@ -51,18 +50,14 @@ const DataConentTrendPic: FC<IProps> = () => {
     return `整体分析-用户-最近${day}天`;
   }, [currentDays]);
   return (
-    <>
-      <h2 style={{ margin: '20px 0 10px' }}>数据趋势</h2>
-      <Trend
-        data={formartCurrentData}
-        axisX={currentData.dates}
-        allZero={isAllZero(formartCurrentData)}
-        downloadName={downloadName}
-        currentDays={currentDays}
-        updatedDays={updateCurrentDays}
-      />
-    </>
+    <Trend
+      data={formartCurrentData}
+      axisX={currentData.dates}
+      allZero={isAllZero(formartCurrentData)}
+      downloadName={downloadName}
+      currentDays={currentDays}
+      updatedDays={updateCurrentDays}
+    />
   );
 };
-
-export default memo(DataConentTrendPic);
+export default memo(ContentOverall);

@@ -9,9 +9,17 @@ const NotFound = lazy(() => import('@/views/notFound'));
 const Creator = lazy(() => import('@/views/creator'));
 const CreatorHome = lazy(() => import('@/views/creator/cpns/home'));
 const ContentMoment = lazy(() => import('@/views/creator/cpns/content/moment'));
-const CreatorFansData = lazy(() => import('@/views/creator/cpns/data/fans'));
-const CreatorContentData = lazy(
-  () => import('@/views/creator/cpns/data/content')
+const FansData = lazy(() => import('@/views/creator/cpns/data/fans'));
+const FansOverall = lazy(
+  () => import('@/views/creator/cpns/data/fans/cpns/overall')
+);
+const FansList = lazy(() => import('@/views/creator/cpns/data/fans/cpns/list'));
+const ContentData = lazy(() => import('@/views/creator/cpns/data/content'));
+const ContentDataOverall = lazy(
+  () => import('@/views/creator/cpns/data/content/cpns/overall')
+);
+const ContentDataSingle = lazy(
+  () => import('@/views/creator/cpns/data/content/cpns/single')
 );
 const CreatorHelp = lazy(() => import('@/views/creator/cpns/help'));
 const Publish = lazy(() => import('@/views/creator/cpns/publish'));
@@ -20,7 +28,7 @@ const Label = lazy(() => import('@/views/label/index'));
 const routes: RouteObject[] = [
   {
     path: '/',
-    element: <Navigate to="/home" />
+    element: <Navigate to="/home" replace />
   },
   {
     path: '/home',
@@ -44,30 +52,58 @@ const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <Navigate to="/creator/home" />
+        element: <Navigate to="home" />
       },
       {
-        path: '/creator/home',
+        path: 'home',
         element: <CreatorHome />
       },
       {
-        path: '/creator/publish',
+        path: 'publish',
         element: <Publish />
       },
       {
-        path: '/creator/content/moment',
+        path: 'content/moment',
         element: <ContentMoment />
       },
       {
-        path: '/creator/data/fans',
-        element: <CreatorFansData />
+        path: 'data/fans',
+        element: <FansData />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="overview" replace />
+          },
+          {
+            path: 'overview',
+            element: <FansOverall />
+          },
+          {
+            path: 'list',
+            element: <FansList />
+          }
+        ]
       },
       {
-        path: '/creator/data/content',
-        element: <CreatorContentData />
+        path: 'data/content',
+        element: <ContentData />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="overview" replace />
+          },
+          {
+            path: 'overview',
+            element: <ContentDataOverall />
+          },
+          {
+            path: 'single',
+            element: <ContentDataSingle />
+          }
+        ]
       },
       {
-        path: '/creator/help/questions',
+        path: 'help/questions',
         element: <CreatorHelp />
       }
     ]

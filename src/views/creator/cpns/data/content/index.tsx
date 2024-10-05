@@ -1,10 +1,10 @@
 import React, { FC, memo, ReactNode, useMemo } from 'react';
+import { Outlet } from 'react-router-dom';
 import { Tooltip } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import AreaHeaderV2 from '@/base-ui/area-header-V2';
+import Overview from './cpns/overview';
 import { formatDate, getYesterday } from '@/utils/date';
-import ContentDataOverview from './cpns/overview';
-import DataConentTrendPic from './cpns/trendpic';
 import { DataContentWrapper } from './style';
 
 interface IProps {
@@ -30,16 +30,19 @@ const DataContent: FC<IProps> = () => {
   );
   const components: ReactNode[] = [
     <>
-      <ContentDataOverview />
-      <DataConentTrendPic />
-    </>,
-    '专栏',
-    '沸点'
+      <Overview />
+      <h2 style={{ margin: '20px 0 10px' }}>数据趋势</h2>
+      <AreaHeaderV2
+        titles={['整体分析', '单篇分析']}
+        urls={['overview', 'single']}
+        components={[<Outlet />, <Outlet />]}
+      />
+    </>
   ];
   return (
     <DataContentWrapper>
       <AreaHeaderV2
-        titles={['文章数据', '专栏数据', '沸点数据']}
+        titles={['动态数据']}
         right={right}
         components={components}
       />

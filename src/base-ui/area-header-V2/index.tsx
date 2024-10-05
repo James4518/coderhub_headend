@@ -1,16 +1,24 @@
-import React, { FC, memo, ReactNode, useState } from 'react';
+import React, { FC, memo, ReactNode, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { AreaHeaderV2Wrapper } from './type';
+import { useNavigate } from 'react-router-dom';
 
 interface IProps {
   children?: ReactNode;
   titles: string[];
+  urls?: string[];
   right?: ReactNode;
   components: ReactNode[];
 }
 
-const AreaHeaderV2: FC<IProps> = ({ titles, right = '', components }) => {
+const AreaHeaderV2: FC<IProps> = ({ titles, urls, right = '', components }) => {
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
+  useEffect(() => {
+    if (urls && urls.length > 0) {
+      navigate(urls[currentIndex]);
+    }
+  }, [currentIndex, urls]);
   const titleClick = (index: number) => {
     setCurrentIndex(index);
   };
