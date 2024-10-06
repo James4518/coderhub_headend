@@ -1,6 +1,6 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { FC, ReactNode } from 'react';
-import { Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Button, Menu, MenuProps } from 'antd';
 import {
   FundProjectionScreenOutlined,
@@ -10,20 +10,18 @@ import {
 import withAuth from '@/base-ui/witAuth';
 import IconContent from '@/assets/icons/content';
 import useProtectedOperation from '@/hooks/useProtectedOperation';
+import useExtractedPath from '@/hooks/useExtractedPath';
 import { CreatorWrapper } from './style';
 
 interface IProps {
   children?: ReactNode;
 }
 type MenuItem = Required<MenuProps>['items'][number];
+
 const Creator: FC<IProps> = () => {
-  const location = useLocation();
-  const match = useMatch('/creator/*');
-  const currentPath = location.pathname;
-  const relativePath = match
-    ? currentPath.replace(match.pathnameBase + '/', '')
-    : '';
   const navigate = useNavigate();
+  const extractedPath = useExtractedPath('/creator');
+  const memoizedPath = useMemo(() => extractedPath, [extractedPath]);
   const publishBtnClick = () => {
     navigate('/creator/publish');
   };
@@ -37,7 +35,10 @@ const Creator: FC<IProps> = () => {
       key: 'content',
       label: '内容管理',
       icon: <IconContent width={15} height={15} />,
-      children: [{ key: 'content/moment', label: '动态管理' }]
+      children: [
+        { key: 'content/moment', label: '动态管理' },
+        { key: 'content/draft', label: '草稿管理' }
+      ]
     },
     {
       key: 'data',
@@ -69,8 +70,9 @@ const Creator: FC<IProps> = () => {
           className="memu"
           onClick={onClick}
           style={{ maxWidth: 200 }}
-          defaultSelectedKeys={[relativePath] || ['home']}
+          defaultSelectedKeys={['home']}
           defaultOpenKeys={['home', 'content', 'data', 'help']}
+          selectedKeys={[memoizedPath]}
           mode="inline"
           items={items}
         />

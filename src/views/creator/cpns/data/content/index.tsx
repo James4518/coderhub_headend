@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Tooltip } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import AreaHeaderV2 from '@/base-ui/area-header-V2';
+import withAuth from '@/base-ui/witAuth';
 import Overview from './cpns/overview';
 import { formatDate, getYesterday } from '@/utils/date';
 import { DataContentWrapper } from './style';
@@ -50,4 +51,4 @@ const DataContent: FC<IProps> = () => {
   );
 };
 
-export default memo(DataContent);
+export default withAuth(memo(DataContent));

@@ -5,10 +5,6 @@ export const CreatorWrapper = styled.div`
   .publish: {
     width: 200px;
   }
-  .memu {
-    max-height: 320px;
-    overflow-y: auto;
-  }
   :where(.css-dev-only-do-not-override-1pg9a38).ant-menu-inline.ant-menu-root
     .ant-menu-item
     > .ant-menu-title-content,
