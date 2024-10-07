@@ -173,7 +173,6 @@ const Publish: FC<IProps> = () => {
     const newLabels = checked
       ? [...labels, label]
       : labels.filter((t) => t !== label);
-    console.log(newLabels);
     setLabels(newLabels);
     form.setFieldsValue({ labels: newLabels });
   };
@@ -216,8 +215,8 @@ const Publish: FC<IProps> = () => {
         <Button key="home" onClick={() => navigate('/')}>
           回首页
         </Button>,
-        <Button key="creator" onClick={() => navigate('/creator/publish')}>
-          回创作中心
+        <Button key="creator" onClick={() => navigate('/creator')}>
+          返回
         </Button>
       ]}
     />

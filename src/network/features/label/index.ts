@@ -5,11 +5,11 @@ import { ILabel, ILabelsName } from './type';
 
 export async function addMomentLabel(
   id: number,
-  data: ILabelsName[]
+  labels: ILabelsName[]
 ): Promise<IRes<string>> {
   return await myRequest.post({
-    url: `moment/labels/:${id}`,
-    data
+    url: `moment/labels/${id}`,
+    data: { labels }
   });
 }
 export async function getLabels(

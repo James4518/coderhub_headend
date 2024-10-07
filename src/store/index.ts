@@ -11,6 +11,7 @@ import praiseReducer from './modules/praise';
 import labelReducer from './modules/label';
 import dataReducer from './modules/data';
 import reviewReducer from './modules/review';
+import draftReducer from './modules/draft';
 import { checkDataMiddleware } from './middlewares';
 import { DispatchType, IRootState } from './type';
 
@@ -21,7 +22,8 @@ const store = configureStore({
     praise: praiseReducer,
     label: labelReducer,
     data: dataReducer,
-    review: reviewReducer
+    review: reviewReducer,
+    draft: draftReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(

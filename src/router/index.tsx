@@ -9,6 +9,7 @@ const NotFound = lazy(() => import('@/views/notFound'));
 const Creator = lazy(() => import('@/views/creator'));
 const CreatorHome = lazy(() => import('@/views/creator/cpns/home'));
 const ContentMoment = lazy(() => import('@/views/creator/cpns/content/moment'));
+const ContentDraft = lazy(() => import('@/views/creator/cpns/content/draft'));
 const FansData = lazy(() => import('@/views/creator/cpns/data/fans'));
 const FansOverall = lazy(
   () => import('@/views/creator/cpns/data/fans/cpns/overall')
@@ -65,6 +66,10 @@ const routes: RouteObject[] = [
       {
         path: 'content/moment',
         element: <ContentMoment />
+      },
+      {
+        path: 'content/draft',
+        element: <ContentDraft />
       },
       {
         path: 'data/fans',
